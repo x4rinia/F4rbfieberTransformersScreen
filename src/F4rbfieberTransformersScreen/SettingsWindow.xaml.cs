@@ -24,7 +24,7 @@ public partial class SettingsWindow : Window
     {
         CustomNameInput.Text = settings.CustomName;
         RealDataCheck.IsChecked = settings.ShowRealData;
-        EventsCheck.IsChecked = settings.EnableEvents;
+        // Removed EventsCheck.IsChecked = settings.EnableEvents;
         Select(MonitorCombo, settings.MonitorTarget, useTag: true);
         Select(FpsCombo, settings.TargetFps.ToString(), useTag: false);
         Select(QualityCombo, settings.AnimationQuality, useTag: false);
@@ -53,7 +53,7 @@ public partial class SettingsWindow : Window
             ShowRealData = RealDataCheck.IsChecked == true,
             ShowGpuData = true,
             ShowNetworkData = true,
-            EnableEvents = EventsCheck.IsChecked == true,
+            EnableEvents = true,
             MonitorTarget = Selected(MonitorCombo, true),
             TargetFps = int.TryParse(Selected(FpsCombo, false), out var fps) ? fps : 60,
             AnimationQuality = Selected(QualityCombo, false),

@@ -346,10 +346,9 @@
                         <TextBox x:Name="CustomNameInput" MaxLength="30" Margin="0,0,0,10" Padding="6" Background="#04121c" Foreground="#dff5ff" BorderBrush="#55B9D9" />
                         
                         <CheckBox x:Name="RealDataCheck" Content="Echte Windows-/Hardware-Telemetrie verwenden" />
-                        <CheckBox x:Name="EventsCheck" Content="Große HUD-Alerts und Transformationshinweise anzeigen" />
                         <TextBlock Margin="24,7,0,0" Foreground="#7F9FB1" FontSize="11" TextWrapping="Wrap"
                                    Text="CPU, GPU, RAM, Temperaturen, Netzwerk, Datenträger, Prozesse, Hostname und Uptime werden aus der bewährten Windows-Sensorbasis gelesen." />
-                        <TextBlock Style="{StaticResource FieldLabel}" Text="AUTOMATISCHE CYBERTRON-ALERTS" Margin="0,15,0,5" />
+                        <TextBlock Style="{StaticResource FieldLabel}" Text="ZUFÄLLIGE CYBERTRON-ALERTS" Margin="0,15,0,5" />
                         <ComboBox x:Name="RandomEventsCombo">
                             <ComboBoxItem Content="Aus" Tag="off" />
                             <ComboBoxItem Content="Selten" Tag="rare" />
