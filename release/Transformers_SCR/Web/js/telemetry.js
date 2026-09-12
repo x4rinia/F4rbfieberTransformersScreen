@@ -105,7 +105,8 @@ function interpolate(now) {
   listeners.forEach(listener => listener(display, delta));
   requestAnimationFrame(interpolate);
 }
-requestAnimationFrame(interpolate);
+// Leave one complete frame for the initial HUD and profile artwork before live canvas work starts.
+requestAnimationFrame(() => requestAnimationFrame(interpolate));
 
 export function subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); }
 export function subscribeSettings(listener) { settingsListeners.add(listener); listener(settings); return () => settingsListeners.delete(listener); }

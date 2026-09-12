@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
   <meta name="color-scheme" content="dark">
   <title>Transformers</title>
+  <link rel="preload" href="assets/cybertron-command-deck.jpg" as="image" fetchpriority="high">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -27,8 +28,8 @@
         <select id="profileSelect" aria-label="Transformer-Profil"></select>
         <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7 5 5 5-5"/></svg>
       </label>
-      <button id="settingsButton" class="settings-button" type="button" aria-label="Einstellungen öffnen">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.3a3.7 3.7 0 1 0 0 7.4 3.7 3.7 0 0 0 0-7.4Zm8 3.7-2.15-1.22.13-2.48-2.28-2.28-2.48.13L12 4 10.78 6.15l-2.48-.13L6.02 8.3l.13 2.48L4 12l2.15 1.22-.13 2.48 2.28 2.28 2.48-.13L12 20l1.22-2.15 2.48.13 2.28-2.28-.13-2.48L20 12Z"/></svg>
+      <button id="settingsButton" class="settings-button" type="button" aria-label="Cybertron-Alert manuell auslösen" title="Alert manuell auslösen">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.4 2 4.8 13.2h6.1L10.1 22l9.1-12.2h-6.1L13.4 2Z"/></svg>
       </button>
     </header>
 
@@ -69,7 +70,7 @@
       <div class="beam" aria-hidden="true"></div>
       <div id="hologramFrame" class="hologram-frame">
         <div class="holo-grid" aria-hidden="true"></div>
-        <img id="hologramImage" class="hologram-image" alt="Transformer als Roboter">
+        <img id="hologramImage" class="hologram-image" alt="Transformer als Roboter" fetchpriority="high">
         <img id="hologramEcho" class="hologram-image echo" alt="" aria-hidden="true">
         <div class="scan-beam" aria-hidden="true"></div>
         <div class="target-ring ring-a" aria-hidden="true"></div>
@@ -121,10 +122,11 @@
 
     <div id="eventOverlay" class="event-overlay" aria-hidden="true"><span>DATEN-SYNCHRONISIERUNG</span></div>
     
-    <!-- Random Events -->
-    <div id="transmissionEvent" class="transmission-event" aria-hidden="true">
-      <span>INCOMING TRANSMISSION</span>
-      <b id="transmissionData"></b>
+    <div id="cyberAlert" class="cyber-alert" aria-hidden="true" aria-live="assertive">
+      <span id="alertCode">CYBERTRON ALERT</span>
+      <strong id="alertTitle">SYSTEM EVENT</strong>
+      <div class="alert-meter" aria-hidden="true"><i id="alertMeter"></i></div>
+      <b id="alertDetail">ENERGY MATRIX ONLINE</b>
     </div>
   </main>
   <script type="module" src="js/app.js"></script>

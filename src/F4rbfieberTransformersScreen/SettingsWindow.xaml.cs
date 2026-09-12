@@ -31,7 +31,8 @@ public partial class SettingsWindow : Window
         Select(ProfileModeCombo, settings.ProfileMode, useTag: true);
         Select(TransformerCombo, settings.TransformerProfile, useTag: true);
         Select(TransformationIntervalCombo, settings.TransformationIntervalSeconds.ToString(), useTag: true);
-        Select(StartFormCombo, settings.StartForm, useTag: true);
+        RobotFormRadio.IsChecked = settings.StartForm != "alt";
+        AltFormRadio.IsChecked = settings.StartForm == "alt";
         Select(ProfileCycleIntervalCombo, settings.ProfileCycleIntervalSeconds.ToString(), useTag: true);
         Select(RandomEventsCombo, settings.RandomEvents, useTag: true);
         EnergySavingCheck.IsChecked = settings.EnergySavingMode;
@@ -41,6 +42,7 @@ public partial class SettingsWindow : Window
         EnsureProfileSelection();
         UpdateProfileSelectionHint();
         UpdateProfileModeState();
+        UpdateStartFormState();
     }
 
     private void SaveClick(object sender, RoutedEventArgs e)
@@ -59,7 +61,7 @@ public partial class SettingsWindow : Window
             TransformerProfile = Selected(TransformerCombo, true),
             SelectedTransformerProfiles = SelectedCycleProfiles(),
             TransformationIntervalSeconds = int.TryParse(Selected(TransformationIntervalCombo, true), out var interval) ? interval : 15,
-            StartForm = Selected(StartFormCombo, true),
+            StartForm = AltFormRadio.IsChecked == true ? "alt" : "robot",
             ProfileCycleIntervalSeconds = int.TryParse(Selected(ProfileCycleIntervalCombo, true), out var profileInterval) ? profileInterval : 60,
             RandomEvents = Selected(RandomEventsCombo, true),
             EnergySavingMode = EnergySavingCheck.IsChecked == true
@@ -75,6 +77,8 @@ public partial class SettingsWindow : Window
     }
 
     private void ProfileModeChanged(object sender, SelectionChangedEventArgs e) => UpdateProfileModeState();
+
+    private void TransformationIntervalChanged(object sender, SelectionChangedEventArgs e) => UpdateStartFormState();
 
     private void ProfileSelectionChanged(object sender, RoutedEventArgs e)
     {
@@ -119,6 +123,14 @@ public partial class SettingsWindow : Window
         ProfileCycleIntervalCombo.IsEnabled = cycleEnabled;
         ProfileCycleSelectionPanel.IsEnabled = cycleEnabled;
         ProfileCycleSelectionPanel.Opacity = cycleEnabled ? 1 : 0.42;
+    }
+
+    private void UpdateStartFormState()
+    {
+        if (TransformationIntervalCombo is null || StartFormPanel is null) return;
+        var fixedFormEnabled = Selected(TransformationIntervalCombo, true) == "0";
+        StartFormPanel.IsEnabled = fixedFormEnabled;
+        StartFormPanel.Opacity = fixedFormEnabled ? 1 : 0.42;
     }
 
     private static void Select(System.Windows.Controls.ComboBox combo, string value, bool useTag)

@@ -122,22 +122,7 @@ profileSelect.addEventListener('change', () => setProfile(profileSelect.value));
 $('#robotMode').addEventListener('click', () => { setForm('robot'); scheduleFormSwitch(); });
 $('#altMode').addEventListener('click', () => { setForm('alt'); scheduleFormSwitch(); });
 
-let isSettingsMessageActive = false;
-$('#settingsButton').addEventListener('click', () => {
-  if (isSettingsMessageActive) return;
-  const overlay = $('#eventOverlay');
-  const messages = ['SYSTEM DIAGNOSTICS ONLINE', 'ENERGON LEVELS OPTIMAL', 'DEFENSE GRID ACTIVE', 'SENSOR ARRAY NOMINAL', 'COMMUNICATIONS ESTABLISHED', 'CYBERTRON LINK STABLE'];
-  overlay.querySelector('span').textContent = messages[Math.floor(Math.random() * messages.length)];
-  overlay.classList.add('visible');
-  isSettingsMessageActive = true;
-  
-  setTimeout(() => {
-    overlay.classList.remove('visible');
-    setTimeout(() => {
-      isSettingsMessageActive = false;
-    }, 300);
-  }, 2000);
-});
+$('#settingsButton').addEventListener('click', () => triggerRandomEvent(true));
 
 class Sparkline {
   constructor(canvas, key, fill = true) { this.canvas = canvas; this.key = key; this.fill = fill; this.ctx = canvas.getContext('2d'); }
@@ -299,41 +284,54 @@ window.addEventListener('keydown', event => {
   if (event.key === 'Enter' || event.key === 'Escape') window.chrome?.webview?.postMessage({ command: 'exit' });
 });
 
-function triggerRandomEvent() {
-  if (isEventActive) { scheduleRandomEvent(); return; }
+function triggerRandomEvent(manual = false) {
+  if (getSettings().enableEvents === false) return;
+  if (isEventActive) {
+    if (!manual) scheduleRandomEvent();
+    return;
+  }
   const frequency = getSettings().randomEvents;
-  if (frequency === 'off') return;
+  if (!manual && frequency === 'off') return;
 
   isEventActive = true;
-  const eventType = Math.floor(Math.random() * 2);
+  const eventType = Math.floor(Math.random() * 3);
   
   if (eventType === 0) {
-    // Transmission
-    const transEl = $('#transmissionEvent');
     const glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
     let text = '';
     for (let i = 0; i < 16; i++) text += glyphs.charAt(Math.floor(Math.random() * glyphs.length));
-    $('#transmissionData').textContent = text;
-    transEl.classList.add('visible');
-    setTimeout(() => {
-      transEl.classList.remove('visible');
-      isEventActive = false;
-      scheduleRandomEvent();
-    }, 3000);
-  } else {
-    // Glitch
+    showCyberAlert('INCOMING TRANSMISSION', 'UNKNOWN SIGNAL DETECTED', text, 72, 'transmission');
+  } else if (eventType === 1) {
     const frame = $('#hologramFrame');
     frame.classList.add('energon-glitch');
-    setTimeout(() => {
-      frame.classList.remove('energon-glitch');
-      isEventActive = false;
-      scheduleRandomEvent();
-    }, 1500);
+    showCyberAlert('CYBERTRON SIGNAL ALERT', 'MATRIX INTERFERENCE', 'HOLOGRAM STABILITY COMPROMISED', 43, 'warning', () => frame.classList.remove('energon-glitch'));
+  } else {
+    const level = 78 + Math.floor(Math.random() * 22);
+    showCyberAlert('ENERGON ENERGY ALERT', 'ENERGY SURGE DETECTED', `ENERGON CORE OUTPUT // ${level}%`, level, 'energon');
   }
+}
+
+function showCyberAlert(code, title, detail, level, tone, onClose) {
+  const alert = $('#cyberAlert');
+  $('#alertCode').textContent = code;
+  $('#alertTitle').textContent = title;
+  $('#alertDetail').textContent = detail;
+  $('#alertMeter').style.width = `${Math.max(5, Math.min(100, level))}%`;
+  alert.dataset.tone = tone;
+  alert.classList.add('visible');
+  alert.setAttribute('aria-hidden', 'false');
+  setTimeout(() => {
+    alert.classList.remove('visible');
+    alert.setAttribute('aria-hidden', 'true');
+    onClose?.();
+    isEventActive = false;
+    scheduleRandomEvent();
+  }, 3200);
 }
 
 function scheduleRandomEvent() {
   clearTimeout(randomEventTimer);
+  if (getSettings().enableEvents === false) return;
   const frequency = getSettings().randomEvents;
   if (!frequency || frequency === 'off') return;
   
@@ -362,6 +360,22 @@ setInterval(updateCoordinates, 8000);
 updateCoordinates();
 
 subscribeSettings(settings => {
+  const alertButton = $('#settingsButton');
+  alertButton.disabled = settings.enableEvents === false;
+  alertButton.title = alertButton.disabled ? 'HUD-Alerts sind in den Einstellungen deaktiviert' : 'Alert manuell auslösen';
+  
+  const interval = Number(settings.transformationIntervalSeconds) || 0;
+  const isAutoSwitch = interval > 0;
+  const robotBtn = $('#robotMode');
+  const altBtn = $('#altMode');
+  
+  robotBtn.disabled = isAutoSwitch;
+  altBtn.disabled = isAutoSwitch;
+  robotBtn.style.opacity = isAutoSwitch ? '0.42' : '1';
+  altBtn.style.opacity = isAutoSwitch ? '0.42' : '1';
+  robotBtn.title = isAutoSwitch ? 'Automatischer Wechsel aktiv' : '';
+  altBtn.title = isAutoSwitch ? 'Automatischer Wechsel aktiv' : '';
+
   scheduleRandomEvent();
 });
 

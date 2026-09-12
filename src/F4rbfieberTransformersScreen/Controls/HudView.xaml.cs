@@ -13,6 +13,8 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
 {
     private static readonly Lazy<Task<CoreWebView2Environment>> SharedWebViewEnvironment =
         new(CreateWebViewEnvironmentAsync);
+    private static readonly object SharedTelemetryLock = new();
+    private static Task<TelemetryService>? SharedTelemetryInitialization;
 
     private readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web);
     private readonly DispatcherTimer _timer;
@@ -24,6 +26,7 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
     private bool _isSecondary;
     private bool _ready;
     private bool _disposed;
+    private bool _ownsTelemetry;
 
     public event EventHandler? SettingsRequested;
     public event EventHandler? ExitRequested;
@@ -39,6 +42,25 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
     public static void WarmUp()
     {
         _ = SharedWebViewEnvironment.Value;
+    }
+
+    public static void ShutdownSharedTelemetry()
+    {
+        Task<TelemetryService>? initialization;
+        lock (SharedTelemetryLock)
+        {
+            initialization = SharedTelemetryInitialization;
+            SharedTelemetryInitialization = null;
+        }
+
+        if (initialization is null) return;
+        if (initialization.IsCompletedSuccessfully)
+            initialization.Result.Dispose();
+        else
+            _ = initialization.ContinueWith(task =>
+            {
+                if (task.IsCompletedSuccessfully) task.Result.Dispose();
+            }, TaskScheduler.Default);
     }
 
     public void Configure(SettingsService settingsService, bool previewMode, bool isSecondary = false)
@@ -139,7 +161,7 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
             var telemetry = await initialization;
             if (_disposed)
             {
-                telemetry.Dispose();
+                if (_ownsTelemetry) telemetry.Dispose();
                 return;
             }
             _telemetry = telemetry;
@@ -163,9 +185,19 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
     private async Task StartTelemetryAfterFirstPaintAsync()
     {
         // WebView gets the first render window before comparatively expensive sensor discovery.
-        await Task.Delay(_previewMode ? 1000 : 500);
+        await Task.Delay(_previewMode ? 1500 : 1200);
         if (_disposed || _telemetryInitialization is not null) return;
-        _telemetryInitialization = Task.Run(() => new TelemetryService(_settings.ShowRealData));
+        if (_settings.ShowRealData)
+        {
+            lock (SharedTelemetryLock)
+                _telemetryInitialization = SharedTelemetryInitialization ??=
+                    Task.Run(() => new TelemetryService(initializeHardware: true));
+        }
+        else
+        {
+            _ownsTelemetry = true;
+            _telemetryInitialization = Task.FromResult(new TelemetryService(initializeHardware: false));
+        }
         await CompleteTelemetryInitializationAsync(_telemetryInitialization);
     }
 
@@ -202,7 +234,7 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
         if (_disposed) return;
         _disposed = true;
         _timer.Stop();
-        _telemetry?.Dispose();
+        if (_ownsTelemetry) _telemetry?.Dispose();
         if (Browser.CoreWebView2 is not null)
         {
             Browser.CoreWebView2.WebMessageReceived -= OnWebMessage;

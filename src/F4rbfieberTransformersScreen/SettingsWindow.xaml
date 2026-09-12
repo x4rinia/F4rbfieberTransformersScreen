@@ -269,8 +269,8 @@
                                 </ComboBox>
                             </StackPanel>
                             <StackPanel Grid.Row="2" Grid.Column="2">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="TRANSFORMATION AUTOMATISCH ÄNDERN" />
-                                <ComboBox x:Name="TransformationIntervalCombo">
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="FORMWECHSEL" />
+                                <ComboBox x:Name="TransformationIntervalCombo" SelectionChanged="TransformationIntervalChanged">
                                     <ComboBoxItem Content="Aus" Tag="0" />
                                     <ComboBoxItem Content="Alle 5 Sekunden" Tag="5" />
                                     <ComboBoxItem Content="Alle 10 Sekunden" Tag="10" />
@@ -278,16 +278,16 @@
                                     <ComboBoxItem Content="Alle 30 Sekunden" Tag="30" />
                                 </ComboBox>
                             </StackPanel>
-                            <StackPanel Grid.Row="4">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="START-/DAUERFORM" />
-                                <ComboBox x:Name="StartFormCombo">
-                                    <ComboBoxItem Content="Roboterform" Tag="robot" />
-                                    <ComboBoxItem Content="Alt-Mode" Tag="alt" />
-                                </ComboBox>
+                            <StackPanel x:Name="StartFormPanel" Grid.Row="4">
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="DAUERFORM (NUR BEI FORMWECHSEL AUS)" />
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton x:Name="RobotFormRadio" GroupName="StartForm" Content="Roboterform" IsChecked="True" Margin="0,0,22,0" />
+                                    <RadioButton x:Name="AltFormRadio" GroupName="StartForm" Content="Alt-Form" />
+                                </StackPanel>
                             </StackPanel>
                             <TextBlock Grid.Row="4" Grid.Column="2" VerticalAlignment="Center"
                                        Foreground="#8BA9BA" FontSize="11" TextWrapping="Wrap"
-                                       Text="Bei „Aus“ bleibt diese Form dauerhaft sichtbar. Bei aktivem Intervall legt sie die Startform fest." />
+                                       Text="Bei Formwechsel „Aus“ bleibt die angehakte Form dauerhaft sichtbar. Mit einem Intervall wechseln Roboter- und Alt-Form automatisch." />
                         </Grid>
 
                         <Border x:Name="ProfileCycleSelectionPanel" Margin="0,20,0,0" Padding="14"
@@ -346,10 +346,10 @@
                         <TextBox x:Name="CustomNameInput" MaxLength="30" Margin="0,0,0,10" Padding="6" Background="#04121c" Foreground="#dff5ff" BorderBrush="#55B9D9" />
                         
                         <CheckBox x:Name="RealDataCheck" Content="Echte Windows-/Hardware-Telemetrie verwenden" />
-                        <CheckBox x:Name="EventsCheck" Content="Dezente System- und Transformationshinweise anzeigen" />
+                        <CheckBox x:Name="EventsCheck" Content="Große HUD-Alerts und Transformationshinweise anzeigen" />
                         <TextBlock Margin="24,7,0,0" Foreground="#7F9FB1" FontSize="11" TextWrapping="Wrap"
                                    Text="CPU, GPU, RAM, Temperaturen, Netzwerk, Datenträger, Prozesse, Hostname und Uptime werden aus der bewährten Windows-Sensorbasis gelesen." />
-                        <TextBlock Style="{StaticResource FieldLabel}" Text="ZUFÄLLIGE CYBERTRON-EREIGNISSE" Margin="0,15,0,5" />
+                        <TextBlock Style="{StaticResource FieldLabel}" Text="AUTOMATISCHE CYBERTRON-ALERTS" Margin="0,15,0,5" />
                         <ComboBox x:Name="RandomEventsCombo">
                             <ComboBoxItem Content="Aus" Tag="off" />
                             <ComboBoxItem Content="Selten" Tag="rare" />

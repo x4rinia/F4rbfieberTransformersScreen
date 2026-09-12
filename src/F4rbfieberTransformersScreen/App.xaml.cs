@@ -38,6 +38,12 @@ public partial class App : System.Windows.Application
         }
     }
 
+    protected override void OnExit(ExitEventArgs e)
+    {
+        HudView.ShutdownSharedTelemetry();
+        base.OnExit(e);
+    }
+
     private void ShowNormalWindow()
     {
         var window = new MainWindow(_settingsService!);

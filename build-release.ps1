@@ -233,7 +233,7 @@ $requiredFiles = @(
     (Join-Path $releaseDirectory 'Install-Screensaver.bat'),
     (Join-Path $releaseDirectory 'Uninstall-Screensaver.bat'),
     (Join-Path $screensaverPayload 'Web\index.html'),
-    (Join-Path $screensaverPayload 'Web\assets\cybertron-command-deck.png'),
+    (Join-Path $screensaverPayload 'Web\assets\cybertron-command-deck.jpg'),
     (Join-Path $screensaverPayload 'Web\assets\dinobot-emblem.png'),
     (Join-Path $screensaverPayload 'Web\assets\optimus-robot.png'),
     (Join-Path $screensaverPayload 'Web\assets\bumblebee-car.png'),
