@@ -5,16 +5,22 @@ namespace F4rbfieberTransformersScreen.Services;
 
 public sealed class TelemetryService : IDisposable
 {
-    private readonly HardwareMonitorService _hardware = new();
+    private readonly HardwareMonitorService? _hardware;
     private readonly CpuService _cpu = new();
     private readonly GpuService _gpu = new();
     private readonly NetworkService _network = new();
     private readonly DiskService _disk = new();
     private readonly ProcessService _processes = new();
 
+    public TelemetryService(bool initializeHardware = true)
+    {
+        if (initializeHardware)
+            _hardware = new HardwareMonitorService();
+    }
+
     public SystemTelemetry Read(AppSettings settings)
     {
-        var hardware = settings.ShowRealData ? _hardware.Snapshot() : [];
+        var hardware = settings.ShowRealData ? _hardware?.Snapshot() ?? [] : [];
         var uptime = TimeSpan.FromMilliseconds(Environment.TickCount64);
 
         if (!settings.ShowRealData)
@@ -84,6 +90,6 @@ public sealed class TelemetryService : IDisposable
     public void Dispose()
     {
         _disk.Dispose();
-        _hardware.Dispose();
+        _hardware?.Dispose();
     }
 }

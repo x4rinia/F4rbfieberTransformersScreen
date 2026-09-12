@@ -114,8 +114,11 @@ public partial class SettingsWindow : Window
 
     private void UpdateProfileModeState()
     {
-        if (ProfileCycleIntervalCombo is null || ProfileModeCombo is null) return;
-        ProfileCycleIntervalCombo.IsEnabled = Selected(ProfileModeCombo, true) == "cycle";
+        if (ProfileCycleIntervalCombo is null || ProfileModeCombo is null || ProfileCycleSelectionPanel is null) return;
+        var cycleEnabled = Selected(ProfileModeCombo, true) == "cycle";
+        ProfileCycleIntervalCombo.IsEnabled = cycleEnabled;
+        ProfileCycleSelectionPanel.IsEnabled = cycleEnabled;
+        ProfileCycleSelectionPanel.Opacity = cycleEnabled ? 1 : 0.42;
     }
 
     private static void Select(System.Windows.Controls.ComboBox combo, string value, bool useTag)

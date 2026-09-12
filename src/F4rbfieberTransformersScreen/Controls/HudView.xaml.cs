@@ -36,6 +36,11 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
         Loaded += Initialize;
     }
 
+    public static void WarmUp()
+    {
+        _ = SharedWebViewEnvironment.Value;
+    }
+
     public void Configure(SettingsService settingsService, bool previewMode, bool isSecondary = false)
     {
         _settingsService = settingsService;
@@ -97,9 +102,6 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
             var url = $"https://cybertron.local/index.html?{string.Join('&', query)}";
             Browser.Source = new Uri(url);
 
-            // Let the first HUD paint while hardware sensors initialize independently.
-            _telemetryInitialization = Task.Run(() => new TelemetryService());
-            _ = CompleteTelemetryInitializationAsync(_telemetryInitialization);
         }
         catch (Exception ex)
         {
@@ -154,8 +156,17 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
         if (!e.IsSuccess) return;
         _ready = true;
         SendEnvelope("settings", _settings);
-        SendTelemetry(this, EventArgs.Empty);
         _timer.Start();
+        _ = StartTelemetryAfterFirstPaintAsync();
+    }
+
+    private async Task StartTelemetryAfterFirstPaintAsync()
+    {
+        // WebView gets the first render window before comparatively expensive sensor discovery.
+        await Task.Delay(_previewMode ? 1000 : 500);
+        if (_disposed || _telemetryInitialization is not null) return;
+        _telemetryInitialization = Task.Run(() => new TelemetryService(_settings.ShowRealData));
+        await CompleteTelemetryInitializationAsync(_telemetryInitialization);
     }
 
     private void SendTelemetry(object? sender, EventArgs e)

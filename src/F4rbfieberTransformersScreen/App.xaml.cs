@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Windows;
+using F4rbfieberTransformersScreen.Controls;
 using F4rbfieberTransformersScreen.Services;
 using Forms = System.Windows.Forms;
 
@@ -16,6 +17,9 @@ public partial class App : System.Windows.Application
         base.OnStartup(e);
         _settingsService = new SettingsService();
         var parsed = StartupOptions.Parse(e.Args);
+
+        if (parsed.Mode != StartupMode.Configure)
+            HudView.WarmUp();
 
         switch (parsed.Mode)
         {
