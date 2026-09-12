@@ -181,7 +181,7 @@ function renderTelemetry(data, now) {
   const stamp = data.timestamp ? new Date(data.timestamp) : new Date();
   $('#clock').textContent = stamp.toLocaleTimeString('de-DE', { hour12: false });
   $('#date').textContent = stamp.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase().replace('.', '');
-  $('#hostName').textContent = (data.computerName || 'LOCAL NODE').toUpperCase();
+  $('#hostName').textContent = (getSettings().customName || data.computerName || 'LOCAL NODE').toUpperCase();
   $('#windowsVersion').textContent = compactWindows(data.windowsVersion);
   $('#uptime').textContent = data.uptime || '00:00:00';
   $('#cpuName').textContent = data.cpu.name || 'PROCESSOR ARRAY';
@@ -271,24 +271,9 @@ function triggerRandomEvent() {
   if (frequency === 'off') return;
 
   isEventActive = true;
-  const eventType = Math.floor(Math.random() * 3);
+  const eventType = Math.floor(Math.random() * 2);
   
   if (eventType === 0) {
-    // Coordinates
-    const coordEl = $('.coordinates');
-    const lat = (Math.random() * 180 - 90).toFixed(4);
-    const lon = (Math.random() * 360 - 180).toFixed(4);
-    coordEl.querySelector('b').textContent = `${lat}° N   ${lon}° E`;
-    const yPos = Math.random() > 0.5 ? '10%' : '80%';
-    coordEl.style.top = yPos;
-    coordEl.style.bottom = 'auto';
-    coordEl.classList.add('visible');
-    setTimeout(() => {
-      coordEl.classList.remove('visible');
-      isEventActive = false;
-      scheduleRandomEvent();
-    }, 4000);
-  } else if (eventType === 1) {
     // Transmission
     const transEl = $('#transmissionEvent');
     const glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
@@ -323,6 +308,24 @@ function scheduleRandomEvent() {
   const delay = Math.random() * (maxDelay - minDelay) + minDelay;
   randomEventTimer = setTimeout(triggerRandomEvent, delay);
 }
+
+function updateCoordinates() {
+  const coordEl = $('.coordinates');
+  const lat = (Math.random() * 180 - 90).toFixed(4);
+  const lon = (Math.random() * 360 - 180).toFixed(4);
+  coordEl.querySelector('b').textContent = `${lat}° N   ${lon}° E`;
+  const yPos = Math.random() > 0.5 ? '10%' : '80%';
+  coordEl.style.top = yPos;
+  coordEl.style.bottom = 'auto';
+  coordEl.classList.add('visible');
+  
+  setTimeout(() => {
+    coordEl.classList.remove('visible');
+  }, 4000);
+}
+
+setInterval(updateCoordinates, 8000);
+updateCoordinates();
 
 subscribeSettings(settings => {
   scheduleRandomEvent();

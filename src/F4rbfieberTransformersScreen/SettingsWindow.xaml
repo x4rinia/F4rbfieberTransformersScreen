@@ -308,6 +308,9 @@
                 <Border Style="{StaticResource Section}">
                     <StackPanel>
                         <TextBlock Style="{StaticResource SectionTitle}" Text="SYSTEMDATEN" />
+                        <TextBlock Style="{StaticResource FieldLabel}" Text="PERSONALISIERTER NODE-NAME" />
+                        <TextBox x:Name="CustomNameInput" MaxLength="30" Margin="0,0,0,10" Padding="6" Background="#04121c" Foreground="#dff5ff" BorderBrush="#55B9D9" />
+                        
                         <CheckBox x:Name="RealDataCheck" Content="Echte Windows-/Hardware-Telemetrie verwenden" />
                         <CheckBox x:Name="EventsCheck" Content="Dezente System- und Transformationshinweise anzeigen" />
                         <TextBlock Margin="24,7,0,0" Foreground="#7F9FB1" FontSize="11" TextWrapping="Wrap"

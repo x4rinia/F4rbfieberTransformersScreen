@@ -2,6 +2,7 @@ namespace F4rbfieberTransformersScreen.Models;
 
 public sealed class AppSettings
 {
+    public string CustomName { get; set; } = string.Empty;
     public bool ShowRealData { get; set; } = true;
     public bool ShowGpuData { get; set; } = true;
     public bool ShowNetworkData { get; set; } = true;

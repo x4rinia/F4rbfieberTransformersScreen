@@ -19,6 +19,7 @@ public partial class SettingsWindow : Window
 
     private void LoadSettings(AppSettings settings)
     {
+        CustomNameInput.Text = settings.CustomName;
         RealDataCheck.IsChecked = settings.ShowRealData;
         EventsCheck.IsChecked = settings.EnableEvents;
         Select(MonitorCombo, settings.MonitorTarget, useTag: true);
@@ -37,6 +38,7 @@ public partial class SettingsWindow : Window
     {
         _settingsService.Save(new AppSettings
         {
+            CustomName = CustomNameInput.Text?.Trim(),
             ShowRealData = RealDataCheck.IsChecked == true,
             ShowGpuData = true,
             ShowNetworkData = true,

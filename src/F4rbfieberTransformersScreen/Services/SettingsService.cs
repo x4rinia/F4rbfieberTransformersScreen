@@ -46,6 +46,9 @@ public sealed class SettingsService
 
     private static void Normalize(AppSettings settings)
     {
+        settings.CustomName = settings.CustomName?.Trim() ?? string.Empty;
+        if (settings.CustomName.Length > 30) settings.CustomName = settings.CustomName.Substring(0, 30);
+        
         settings.TransformerProfile = settings.TransformerProfile?.Trim().ToLowerInvariant() switch
         {
             "bumblebee" => "bumblebee",
