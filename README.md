@@ -1,35 +1,36 @@
 # Transformers Screensaver
 
-Ein eigenständiger Windows-Bildschirmschoner im Cybertron-/Transformers-Stil. Die Transformer dienen ausschließlich als holografisches Theme; die Hauptinhalte sind echte Windows- und Hardwaredaten.
+![Transformers Screensaver](docs/transformers-screen.png)
 
-## Funktionen
+A standalone Windows screensaver in a Cybertron / Transformers style. The Transformers serve exclusively as a holographic theme; the main content consists of real Windows and hardware telemetry data.
 
-- Echte Telemetrie für CPU, CPU-Kerne, GPU, Temperaturen, VRAM, RAM, Netzwerk, Datenträger und aktive Prozesse
-- Hostname, Windows-Version, Datum, Uhrzeit und System-Uptime
-- Vier datengetriebene Profile mit bot-naher Farbwelt und Fraktionslogo:
-  - Optimus Prime — Autobot — Roboter / Truck
-  - Bumblebee — Autobot — Roboter / Sportwagen
-  - Grimlock — Autobot — Roboter / T-Rex
-  - Megatron — Decepticon — Roboter / Cybertron-Panzer
-- Sanfter automatischer Wechsel zwischen Roboter- und Alt-Mode
-- Wahlweise ein fester Transformer oder automatischer Durchlauf aller Profile
-- Optionales Rainbow-Farbprofil für HUD-Linien und Hologrammlicht
-- Monitorziel: nur Monitor 1, 2 oder 3 sowie alle Monitore; nicht ausgewählte Anzeigen bleiben schwarz
-- Windows-Screensaver-Modi `/s`, `/c` und `/p`
-- Primär- und Multi-Monitor-Betrieb
-- Selbstständiger Settings-Speicher unter `%LOCALAPPDATA%\TransformersScreen`
-- Eigenständiger Installer, Payload-Ordner und `.scr`-Launcher
+## Features
 
-## Projektstruktur
+- Real telemetry for CPU, CPU Cores, GPU, Temperatures, VRAM, RAM, Network, Disks, and active processes
+- Hostname (Custom Name), Windows Version, Date, Time, and System Uptime
+- Four data-driven profiles with bot-specific color palettes and faction logos:
+  - Optimus Prime — Autobot — Robot / Truck
+  - Bumblebee — Autobot — Robot / Sports Car
+  - Grimlock — Autobot — Robot / T-Rex
+  - Megatron — Decepticon — Robot / Cybertron Tank
+- Smooth automatic transitions between Robot and Alt-Mode
+- Choose a fixed Transformer or loop through all profiles automatically
+- Target monitor selection: Display on Monitor 1, 2, or 3, or all monitors; unselected displays remain black
+- Supports Windows Screensaver modes `/s`, `/c`, and `/p`
+- Primary and multi-monitor support
+- Independent settings storage located at `%LOCALAPPDATA%\TransformersScreen`
+- Standalone installer, payload folder, and `.scr` launcher
 
-- `src/F4rbfieberTransformersScreen` — WPF-Host, Telemetrie und WebView2-HUD
-- `src/F4rbfieberTransformersScreen.Launcher` — schlanker `.scr`-Launcher
-- `src/F4rbfieberTransformersScreen/Web/js/profiles.js` — zentrale Profile und Farbschemata
-- `build-release.ps1` — reproduzierbarer Release-/Installer-Build
+## Project Structure
 
-Neue Transformer werden ausschließlich als weiteres Profil in `profiles.js`, als Auswahl in der Konfiguration und mit zwei Bildassets ergänzt.
+- `src/F4rbfieberTransformersScreen` — WPF host, telemetry, and WebView2 HUD
+- `src/F4rbfieberTransformersScreen.Launcher` — Lightweight `.scr` launcher
+- `src/F4rbfieberTransformersScreen/Web/js/profiles.js` — Central profiles and color schemes
+- `build-release.ps1` — Reproducible release / installer build
 
-## Starten und bauen
+New Transformers can be added exclusively as another profile in `profiles.js`, as a selection in the configuration window, and with two image assets.
+
+## Running and Building
 
 ```powershell
 dotnet run --project .\src\F4rbfieberTransformersScreen\F4rbfieberTransformersScreen.csproj
@@ -39,8 +40,8 @@ dotnet run --project .\src\F4rbfieberTransformersScreen\F4rbfieberTransformersSc
 .\build-release.ps1
 ```
 
-Der Release-Build erzeugt `release\Transformers_SCR`, `Install-Screensaver.bat` und `Uninstall-Screensaver.bat`. Windows zeigt den Bildschirmschoner als `Transformers.scr` an.
+The release build generates `release\Transformers_SCR`, `Install-Screensaver.bat`, and `Uninstall-Screensaver.bat`. Windows displays the screensaver as `Transformers.scr`.
 
-## Bildquellen
+## Image Sources
 
-Die Cybertron-Umgebung, Hologramme und Embleme wurden speziell für dieses eigenständige Projekt generiert. Die UI, Werte und Bedienelemente sind code-native und keine statische Screenshot-Oberfläche.
+The Cybertron environment, holograms, and emblems were specifically generated for this standalone project. The UI, values, and control elements are code-native and not a static screenshot interface.
