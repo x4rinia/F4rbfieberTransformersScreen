@@ -16,4 +16,5 @@ public sealed class AppSettings
     public string ProfileMode { get; set; } = "fixed";
     public string TransformerProfile { get; set; } = "optimus";
     public string RandomEvents { get; set; } = "normal";
+    public bool EnergySavingMode { get; set; } = false;
 }

@@ -31,6 +31,7 @@ public partial class SettingsWindow : Window
         Select(StartFormCombo, settings.StartForm, useTag: true);
         Select(ProfileCycleIntervalCombo, settings.ProfileCycleIntervalSeconds.ToString(), useTag: true);
         Select(RandomEventsCombo, settings.RandomEvents, useTag: true);
+        EnergySavingCheck.IsChecked = settings.EnergySavingMode;
         UpdateProfileModeState();
     }
 
@@ -51,7 +52,8 @@ public partial class SettingsWindow : Window
             TransformationIntervalSeconds = int.TryParse(Selected(TransformationIntervalCombo, true), out var interval) ? interval : 15,
             StartForm = Selected(StartFormCombo, true),
             ProfileCycleIntervalSeconds = int.TryParse(Selected(ProfileCycleIntervalCombo, true), out var profileInterval) ? profileInterval : 60,
-            RandomEvents = Selected(RandomEventsCombo, true)
+            RandomEvents = Selected(RandomEventsCombo, true),
+            EnergySavingMode = EnergySavingCheck.IsChecked == true
         });
         if (Owner is not null) DialogResult = true;
         else Close();

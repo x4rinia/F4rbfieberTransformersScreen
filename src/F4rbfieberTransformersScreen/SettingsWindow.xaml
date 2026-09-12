@@ -340,6 +340,7 @@
                                     <ComboBoxItem Content="Medium" />
                                     <ComboBoxItem Content="Low" />
                                 </ComboBox>
+                                <CheckBox x:Name="EnergySavingCheck" Content="Energiesparmodus" Margin="0,15,0,0" />
                             </StackPanel>
                             <StackPanel Grid.Column="2">
                                 <TextBlock Style="{StaticResource FieldLabel}" Text="ZIELBILDRATE" />

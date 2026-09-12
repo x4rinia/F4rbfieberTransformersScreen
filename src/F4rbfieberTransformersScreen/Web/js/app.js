@@ -111,7 +111,23 @@ function setForm(form, animate = true) {
 profileSelect.addEventListener('change', () => setProfile(profileSelect.value));
 $('#robotMode').addEventListener('click', () => { setForm('robot'); scheduleFormSwitch(); });
 $('#altMode').addEventListener('click', () => { setForm('alt'); scheduleFormSwitch(); });
-$('#settingsButton').addEventListener('click', () => window.chrome?.webview?.postMessage({ command: 'openSettings' }));
+
+let isSettingsMessageActive = false;
+$('#settingsButton').addEventListener('click', () => {
+  if (isSettingsMessageActive) return;
+  const overlay = $('#eventOverlay');
+  const messages = ['SYSTEM DIAGNOSTICS ONLINE', 'ENERGON LEVELS OPTIMAL', 'DEFENSE GRID ACTIVE', 'SENSOR ARRAY NOMINAL', 'COMMUNICATIONS ESTABLISHED', 'CYBERTRON LINK STABLE'];
+  overlay.querySelector('span').textContent = messages[Math.floor(Math.random() * messages.length)];
+  overlay.classList.add('visible');
+  isSettingsMessageActive = true;
+  
+  setTimeout(() => {
+    overlay.classList.remove('visible');
+    setTimeout(() => {
+      isSettingsMessageActive = false;
+    }, 300);
+  }, 2000);
+});
 
 class Sparkline {
   constructor(canvas, key, fill = true) { this.canvas = canvas; this.key = key; this.fill = fill; this.ctx = canvas.getContext('2d'); }
@@ -219,7 +235,10 @@ function addLog(message) {
 
 subscribeSettings(settings => {
   $('#brandName').textContent = 'TRANSFORMERS';
-  $('#qualityState').textContent = `${settings.targetFps || 60} FPS // ${(settings.animationQuality || 'High').toUpperCase()}`;
+  const isEco = settings.energySavingMode === true;
+  const fps = isEco ? 24 : (settings.targetFps || 60);
+  const qual = isEco ? 'ECO-MODE' : (settings.animationQuality || 'High').toUpperCase();
+  $('#qualityState').textContent = `${fps} FPS // ${qual}`;
   setProfile(settings.transformerProfile || 'optimus', false);
 });
 
