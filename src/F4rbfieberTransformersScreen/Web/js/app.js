@@ -363,18 +363,6 @@ subscribeSettings(settings => {
   const alertButton = $('#settingsButton');
   alertButton.disabled = settings.enableEvents === false;
   alertButton.title = alertButton.disabled ? 'HUD-Alerts sind in den Einstellungen deaktiviert' : 'Alert manuell auslösen';
-  
-  const interval = Number(settings.transformationIntervalSeconds) || 0;
-  const isAutoSwitch = interval > 0;
-  const robotBtn = $('#robotMode');
-  const altBtn = $('#altMode');
-  
-  robotBtn.disabled = isAutoSwitch;
-  altBtn.disabled = isAutoSwitch;
-  robotBtn.style.opacity = isAutoSwitch ? '0.42' : '1';
-  altBtn.style.opacity = isAutoSwitch ? '0.42' : '1';
-  robotBtn.title = isAutoSwitch ? 'Automatischer Wechsel aktiv' : '';
-  altBtn.title = isAutoSwitch ? 'Automatischer Wechsel aktiv' : '';
 
   scheduleRandomEvent();
 });
