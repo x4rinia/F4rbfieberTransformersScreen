@@ -234,10 +234,15 @@ $requiredFiles = @(
     (Join-Path $releaseDirectory 'Uninstall-Screensaver.bat'),
     (Join-Path $screensaverPayload 'Web\index.html'),
     (Join-Path $screensaverPayload 'Web\assets\cybertron-command-deck.png'),
+    (Join-Path $screensaverPayload 'Web\assets\dinobot-emblem.png'),
     (Join-Path $screensaverPayload 'Web\assets\optimus-robot.png'),
     (Join-Path $screensaverPayload 'Web\assets\bumblebee-car.png'),
     (Join-Path $screensaverPayload 'Web\assets\grimlock-trex.png'),
+    (Join-Path $screensaverPayload 'Web\assets\hound-robot.png'),
+    (Join-Path $screensaverPayload 'Web\assets\hound-truck.png'),
     (Join-Path $screensaverPayload 'Web\assets\megatron-tank.png'),
+    (Join-Path $screensaverPayload 'Web\assets\shockwave-robot.png'),
+    (Join-Path $screensaverPayload 'Web\assets\shockwave-tank.png'),
     (Join-Path $screensaverPayload 'Web\js\profiles.js')
 )
 foreach ($requiredFile in $requiredFiles) {

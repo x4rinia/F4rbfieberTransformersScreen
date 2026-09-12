@@ -8,13 +8,18 @@ A standalone Windows screensaver in a Cybertron / Transformers style. The Transf
 
 - Real telemetry for CPU, CPU Cores, GPU, Temperatures, VRAM, RAM, Network, Disks, and active processes
 - Hostname (Custom Name), Windows Version, Date, Time, and System Uptime
-- Four data-driven profiles with bot-specific color palettes and faction logos:
+- Six data-driven profiles with clearly separated color palettes and correct faction logos:
+  - Grimlock — Dinobot — Robot / T-Rex — Antique Gold, Brass, and Gunmetal
+  - Hound — Autobot — Robot / Military Truck — Olive, Khaki, and Bronze
   - Optimus Prime — Autobot — Robot / Truck
   - Bumblebee — Autobot — Robot / Sports Car
-  - Grimlock — Autobot — Robot / T-Rex
   - Megatron — Decepticon — Robot / Cybertron Tank
+  - Shockwave — Decepticon — Robot / Cybertron Hover Tank
+- Grimlock displays the Dinobot emblem, Autobots display the Autobot emblem, and Decepticons display the Decepticon emblem
 - Smooth automatic transitions between Robot and Alt-Mode
-- Choose a fixed Transformer or loop through all profiles automatically
+- Choose a fixed Transformer or loop through individually enabled profiles
+- Select cycle profiles individually; at least one profile always stays active
+- Faster startup through a persistent WebView2 profile, deferred hardware-sensor initialization, and no hidden HUD startup on blank monitors
 - Target monitor selection: Display on Monitor 1, 2, or 3, or all monitors; unselected displays remain black
 - Supports Windows Screensaver modes `/s`, `/c`, and `/p`
 - Primary and multi-monitor support

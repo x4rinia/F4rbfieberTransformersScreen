@@ -1,5 +1,5 @@
 import { subscribe, subscribeSettings, getSettings, format, isNativeTelemetry } from './telemetry.js';
-import { PROFILES, getProfile } from './profiles.js';
+import { PROFILES, getProfile, getEnabledProfileIds } from './profiles.js';
 
 const $ = selector => document.querySelector(selector);
 const app = $('#app');
@@ -27,13 +27,13 @@ for (const profile of Object.values(PROFILES)) {
   profileSelect.append(option);
 }
 
-function setProfile(profileId, animate = true) {
+function setProfile(profileId, animate = true, targetForm = activeForm) {
   const nextProfile = getProfile(profileId);
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!animate || reducedMotion || nextProfile.id === activeProfile.id) {
     profileTransitionToken += 1;
     app.classList.remove('profile-switch-out', 'profile-switch-in');
-    commitProfile(nextProfile);
+    commitProfile(nextProfile, targetForm);
     return;
   }
 
@@ -45,7 +45,7 @@ function setProfile(profileId, animate = true) {
 
   window.setTimeout(() => {
     if (transitionToken !== profileTransitionToken) return;
-    commitProfile(nextProfile);
+    commitProfile(nextProfile, targetForm);
     app.classList.remove('profile-switch-out');
     app.classList.add('profile-switch-in');
     window.setTimeout(() => {
@@ -54,7 +54,7 @@ function setProfile(profileId, animate = true) {
   }, 340);
 }
 
-function commitProfile(profile) {
+function commitProfile(profile, targetForm = activeForm) {
   activeProfile = profile;
   app.dataset.profile = activeProfile.id;
   applyPalette();
@@ -62,9 +62,9 @@ function commitProfile(profile) {
   $('#hologramTitle').textContent = activeProfile.name;
   $('#profileFaction').textContent = `${activeProfile.faction} // HOLOGRAMM`;
   $('#altModeLabel').textContent = activeProfile.altLabel;
-  $('#headerFactionLogo').src = activeProfile.factionLogo;
-  $('#factionWatermark').src = activeProfile.factionLogo;
-  setForm(getSettings().startForm === 'alt' ? 'alt' : 'robot', false);
+  setFactionLogo($('#headerFactionLogo'), activeProfile.factionLogo);
+  setFactionLogo($('#factionWatermark'), activeProfile.factionLogo);
+  setForm(targetForm === 'alt' ? 'alt' : 'robot', false);
   scheduleFormSwitch();
   scheduleProfileSwitch();
 }
@@ -77,9 +77,19 @@ function scheduleFormSwitch() {
 }
 
 function scheduleProfileSwitch() {
-  nextProfileSwitch = getSettings().profileMode === 'cycle'
+  const settings = getSettings();
+  const enabledProfileIds = getEnabledProfileIds(settings, activeProfile.id);
+  nextProfileSwitch = settings.profileMode === 'cycle' && enabledProfileIds.length > 1
     ? performance.now() + Math.max(30, Number(getSettings().profileCycleIntervalSeconds) || 60) * 1000
     : Number.POSITIVE_INFINITY;
+}
+
+function setFactionLogo(image, source) {
+  const hasLogo = Boolean(source);
+  image.hidden = !hasLogo;
+  image.style.display = hasLogo ? '' : 'none';
+  if (hasLogo) image.src = source;
+  else image.removeAttribute('src');
 }
 
 function applyPalette() {
@@ -239,14 +249,19 @@ subscribeSettings(settings => {
   const fps = isEco ? 24 : (settings.targetFps || 60);
   const qual = isEco ? 'ECO-MODE' : (settings.animationQuality || 'High').toUpperCase();
   $('#qualityState').textContent = `${fps} FPS // ${qual}`;
-  setProfile(settings.transformerProfile || 'optimus', false);
+  const configuredProfile = getProfile(settings.transformerProfile || 'optimus').id;
+  const enabledProfileIds = getEnabledProfileIds(settings, configuredProfile);
+  const initialProfile = settings.profileMode === 'cycle' && !enabledProfileIds.includes(configuredProfile)
+    ? enabledProfileIds[0]
+    : configuredProfile;
+  setProfile(initialProfile, false, settings.startForm);
 });
 
 subscribe((data) => {
   const now = performance.now();
   renderTelemetry(data, now);
   if (getSettings().profileMode === 'cycle' && now >= nextProfileSwitch) {
-    const profileIds = Object.keys(PROFILES);
+    const profileIds = getEnabledProfileIds(getSettings(), activeProfile.id);
     const nextIndex = (profileIds.indexOf(activeProfile.id) + 1) % profileIds.length;
     setProfile(profileIds[nextIndex]);
   }

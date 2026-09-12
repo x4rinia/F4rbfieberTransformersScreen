@@ -6,6 +6,9 @@ namespace F4rbfieberTransformersScreen.Services;
 
 public sealed class SettingsService
 {
+    private static readonly string[] ProfileIds =
+        ["grimlock", "hound", "optimus", "bumblebee", "megatron", "shockwave"];
+
     private readonly string _settingsPath;
     private readonly JsonSerializerOptions _jsonOptions = new() { WriteIndented = true };
 
@@ -53,9 +56,20 @@ public sealed class SettingsService
         {
             "bumblebee" => "bumblebee",
             "grimlock" => "grimlock",
+            "hound" => "hound",
             "megatron" => "megatron",
+            "shockwave" => "shockwave",
             _ => "optimus"
         };
+        var validProfileIds = ProfileIds.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        settings.SelectedTransformerProfiles = (settings.SelectedTransformerProfiles ?? [])
+            .Select(id => id?.Trim().ToLowerInvariant())
+            .Where(id => id is not null && validProfileIds.Contains(id))
+            .Cast<string>()
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        if (settings.SelectedTransformerProfiles.Count == 0)
+            settings.SelectedTransformerProfiles.Add(settings.TransformerProfile);
         settings.ProfileMode = settings.ProfileMode?.Trim().ToLowerInvariant() == "cycle" ? "cycle" : "fixed";
         settings.StartForm = settings.StartForm?.Trim().ToLowerInvariant() == "alt" ? "alt" : "robot";
         settings.MonitorTarget = settings.MonitorTarget?.Trim().ToLowerInvariant() switch

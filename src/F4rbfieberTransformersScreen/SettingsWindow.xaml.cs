@@ -9,6 +9,9 @@ public partial class SettingsWindow : Window
 {
     private readonly SettingsService _settingsService;
 
+    private System.Windows.Controls.CheckBox[] ProfileCycleChecks =>
+        [GrimlockCycleCheck, HoundCycleCheck, OptimusCycleCheck, BumblebeeCycleCheck, MegatronCycleCheck, ShockwaveCycleCheck];
+
     public SettingsWindow(SettingsService settingsService)
     {
         _settingsService = settingsService;
@@ -32,6 +35,11 @@ public partial class SettingsWindow : Window
         Select(ProfileCycleIntervalCombo, settings.ProfileCycleIntervalSeconds.ToString(), useTag: true);
         Select(RandomEventsCombo, settings.RandomEvents, useTag: true);
         EnergySavingCheck.IsChecked = settings.EnergySavingMode;
+        var selectedProfiles = settings.SelectedTransformerProfiles.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (var checkBox in ProfileCycleChecks)
+            checkBox.IsChecked = selectedProfiles.Contains(checkBox.Tag?.ToString() ?? string.Empty);
+        EnsureProfileSelection();
+        UpdateProfileSelectionHint();
         UpdateProfileModeState();
     }
 
@@ -39,7 +47,7 @@ public partial class SettingsWindow : Window
     {
         _settingsService.Save(new AppSettings
         {
-            CustomName = CustomNameInput.Text?.Trim(),
+            CustomName = CustomNameInput.Text?.Trim() ?? string.Empty,
             ShowRealData = RealDataCheck.IsChecked == true,
             ShowGpuData = true,
             ShowNetworkData = true,
@@ -49,6 +57,7 @@ public partial class SettingsWindow : Window
             AnimationQuality = Selected(QualityCombo, false),
             ProfileMode = Selected(ProfileModeCombo, true),
             TransformerProfile = Selected(TransformerCombo, true),
+            SelectedTransformerProfiles = SelectedCycleProfiles(),
             TransformationIntervalSeconds = int.TryParse(Selected(TransformationIntervalCombo, true), out var interval) ? interval : 15,
             StartForm = Selected(StartFormCombo, true),
             ProfileCycleIntervalSeconds = int.TryParse(Selected(ProfileCycleIntervalCombo, true), out var profileInterval) ? profileInterval : 60,
@@ -66,6 +75,42 @@ public partial class SettingsWindow : Window
     }
 
     private void ProfileModeChanged(object sender, SelectionChangedEventArgs e) => UpdateProfileModeState();
+
+    private void ProfileSelectionChanged(object sender, RoutedEventArgs e)
+    {
+        if (SelectedCycleProfiles().Count > 0)
+        {
+            UpdateProfileSelectionHint();
+            return;
+        }
+
+        if (sender is System.Windows.Controls.CheckBox checkBox) checkBox.IsChecked = true;
+        ProfileSelectionHint.Text = "Mindestens ein Profil muss aktiv bleiben.";
+    }
+
+    private List<string> SelectedCycleProfiles() => ProfileCycleChecks
+        .Where(checkBox => checkBox.IsChecked == true)
+        .Select(checkBox => checkBox.Tag?.ToString() ?? string.Empty)
+        .Where(value => !string.IsNullOrWhiteSpace(value))
+        .ToList();
+
+    private void EnsureProfileSelection()
+    {
+        if (SelectedCycleProfiles().Count > 0) return;
+        var currentProfile = Selected(TransformerCombo, true);
+        var fallback = ProfileCycleChecks.FirstOrDefault(checkBox =>
+            string.Equals(checkBox.Tag?.ToString(), currentProfile, StringComparison.OrdinalIgnoreCase))
+            ?? OptimusCycleCheck;
+        fallback.IsChecked = true;
+    }
+
+    private void UpdateProfileSelectionHint()
+    {
+        var count = SelectedCycleProfiles().Count;
+        ProfileSelectionHint.Text = count == 1
+            ? "1 Profil aktiv – kein unnötiger automatischer Wechsel."
+            : $"{count} Profile für den automatischen Wechsel aktiv.";
+    }
 
     private void UpdateProfileModeState()
     {

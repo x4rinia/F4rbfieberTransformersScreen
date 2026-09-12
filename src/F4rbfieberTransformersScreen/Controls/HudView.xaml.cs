@@ -11,9 +11,13 @@ namespace F4rbfieberTransformersScreen.Controls;
 
 public partial class HudView : System.Windows.Controls.UserControl, IDisposable
 {
+    private static readonly Lazy<Task<CoreWebView2Environment>> SharedWebViewEnvironment =
+        new(CreateWebViewEnvironmentAsync);
+
     private readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web);
     private readonly DispatcherTimer _timer;
     private TelemetryService? _telemetry;
+    private Task<TelemetryService>? _telemetryInitialization;
     private SettingsService? _settingsService;
     private AppSettings _settings = new();
     private bool _previewMode;
@@ -41,6 +45,12 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
         _timer.Interval = _settings.EnergySavingMode ? TimeSpan.FromMilliseconds(2000) : TimeSpan.FromMilliseconds(750);
     }
 
+    public void Disable()
+    {
+        Loaded -= Initialize;
+        Visibility = Visibility.Collapsed;
+    }
+
     public void ReloadSettings()
     {
         if (_settingsService is null) return;
@@ -53,10 +63,7 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
         if (_ready || _disposed) return;
         try
         {
-            _telemetry = new TelemetryService();
-            var userDataFolder = Path.Combine(Path.GetTempPath(), "TransformersScreen", Guid.NewGuid().ToString());
-            Directory.CreateDirectory(userDataFolder);
-            var webViewEnvironment = await CoreWebView2Environment.CreateAsync(userDataFolder: userDataFolder);
+            var webViewEnvironment = await SharedWebViewEnvironment.Value;
             await Browser.EnsureCoreWebView2Async(webViewEnvironment);
             Browser.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
             Browser.CoreWebView2.Settings.AreDevToolsEnabled = !_previewMode;
@@ -78,11 +85,21 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
                 "cybertron.local", webRoot, CoreWebView2HostResourceAccessKind.DenyCors);
             
             var isSingleMonitor = System.Windows.Forms.Screen.AllScreens.Length == 1 || _settings.MonitorTarget != "all";
-            var url = "https://cybertron.local/index.html";
-            if (_isSecondary) url += "?secondary=1";
-            else if (isSingleMonitor) url += "?singleMonitor=1";
-            else url += "?primaryMulti=1";
+            var initialProfile = ResolveInitialProfile(_settings);
+            var query = new List<string>
+            {
+                $"profile={Uri.EscapeDataString(initialProfile)}",
+                $"form={Uri.EscapeDataString(_settings.StartForm)}"
+            };
+            if (_isSecondary) query.Add("secondary=1");
+            else if (isSingleMonitor) query.Add("singleMonitor=1");
+            else query.Add("primaryMulti=1");
+            var url = $"https://cybertron.local/index.html?{string.Join('&', query)}";
             Browser.Source = new Uri(url);
+
+            // Let the first HUD paint while hardware sensors initialize independently.
+            _telemetryInitialization = Task.Run(() => new TelemetryService());
+            _ = CompleteTelemetryInitializationAsync(_telemetryInitialization);
         }
         catch (Exception ex)
         {
@@ -91,6 +108,44 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
                 Fallback.Visibility = Visibility.Visible;
                 FallbackMessage.Text = "Microsoft Edge WebView2 Runtime konnte nicht initialisiert werden.\n" + ex.Message;
             }
+        }
+    }
+
+    private static Task<CoreWebView2Environment> CreateWebViewEnvironmentAsync()
+    {
+        var userDataFolder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "TransformersScreen",
+            "WebView2");
+        Directory.CreateDirectory(userDataFolder);
+        return CoreWebView2Environment.CreateAsync(userDataFolder: userDataFolder);
+    }
+
+    private static string ResolveInitialProfile(AppSettings settings)
+    {
+        if (!string.Equals(settings.ProfileMode, "cycle", StringComparison.OrdinalIgnoreCase))
+            return settings.TransformerProfile;
+        return settings.SelectedTransformerProfiles.Contains(settings.TransformerProfile, StringComparer.OrdinalIgnoreCase)
+            ? settings.TransformerProfile
+            : settings.SelectedTransformerProfiles[0];
+    }
+
+    private async Task CompleteTelemetryInitializationAsync(Task<TelemetryService> initialization)
+    {
+        try
+        {
+            var telemetry = await initialization;
+            if (_disposed)
+            {
+                telemetry.Dispose();
+                return;
+            }
+            _telemetry = telemetry;
+            SendTelemetry(this, EventArgs.Empty);
+        }
+        catch
+        {
+            // The built-in animated fallback stays active when sensors are unavailable.
         }
     }
 

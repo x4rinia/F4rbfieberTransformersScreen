@@ -21,14 +21,16 @@ const fallback = {
 
 let target = structuredClone(fallback);
 let display = structuredClone(fallback);
+const startupParameters = new URLSearchParams(window.location.search);
 let settings = {
   targetFps: 60,
   animationQuality: 'High',
-  transformerProfile: 'optimus',
+  transformerProfile: startupParameters.get('profile') || 'optimus',
   transformationIntervalSeconds: 15,
-  startForm: 'robot',
+  startForm: startupParameters.get('form') === 'alt' ? 'alt' : 'robot',
   profileMode: 'fixed',
   profileCycleIntervalSeconds: 60,
+  selectedTransformerProfiles: ['grimlock', 'hound', 'optimus', 'bumblebee', 'megatron', 'shockwave'],
   monitorTarget: '1',
   enableEvents: true
 };
