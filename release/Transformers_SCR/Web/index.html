@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="color-scheme" content="dark">
+  <title>Transformers</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main id="app" class="app" data-profile="optimus" data-form="robot">
+    <div class="world" aria-hidden="true"></div>
+    <div class="world-shade" aria-hidden="true"></div>
+    <div class="circuit-field" aria-hidden="true"></div>
+    <div class="screen-noise" aria-hidden="true"></div>
+
+    <header class="command-rail">
+      <div class="brand-lockup">
+        <img id="headerFactionLogo" src="assets/autobot-emblem.png" alt="">
+        <div><strong id="brandName">TRANSFORMERS</strong><span>CYBERTRON SYSTEM HUD</span></div>
+      </div>
+      <div class="machine-id">
+        <span id="hostName">LOCAL NODE</span><i>//</i><span id="windowsVersion">WINDOWS</span>
+      </div>
+      <label class="profile-select" for="profileSelect">
+        <span>HOLOGRAMM-PROFIL</span>
+        <select id="profileSelect" aria-label="Transformer-Profil"></select>
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7 5 5 5-5"/></svg>
+      </label>
+      <button id="settingsButton" class="settings-button" type="button" aria-label="Einstellungen öffnen">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.3a3.7 3.7 0 1 0 0 7.4 3.7 3.7 0 0 0 0-7.4Zm8 3.7-2.15-1.22.13-2.48-2.28-2.28-2.48.13L12 4 10.78 6.15l-2.48-.13L6.02 8.3l.13 2.48L4 12l2.15 1.22-.13 2.48 2.28 2.28 2.48-.13L12 20l1.22-2.15 2.48.13 2.28-2.28-.13-2.48L20 12Z"/></svg>
+      </button>
+    </header>
+
+    <section class="systems-rail hud-cut" aria-labelledby="systemsTitle">
+      <div class="rail-title"><span>01</span><h1 id="systemsTitle">SYSTEME</h1><i></i></div>
+
+      <article class="metric-block">
+        <div class="metric-heading"><h2>CPU</h2><span id="cpuName">PROCESSOR ARRAY</span></div>
+        <div class="metric-reading"><strong id="cpuValue">--%</strong><canvas id="cpuChart"></canvas><div><small>TEMP</small><b id="cpuTemp">N/A</b></div></div>
+        <div class="core-grid" id="coreGrid" aria-label="CPU-Kernauslastung"></div>
+      </article>
+
+      <article class="metric-block">
+        <div class="metric-heading"><h2>GPU</h2><span id="gpuName">GRAPHICS ARRAY</span></div>
+        <div class="metric-reading"><strong id="gpuValue">--%</strong><canvas id="gpuChart"></canvas><div><small>TEMP</small><b id="gpuTemp">N/A</b></div></div>
+        <div class="data-pair"><span>VRAM</span><b id="vramValue">N/A</b></div>
+      </article>
+
+      <article class="metric-block ram-block">
+        <div class="metric-heading"><h2>RAM</h2><span>PHYSICAL MEMORY</span></div>
+        <div class="metric-reading"><strong id="ramValue">--%</strong><canvas id="ramChart"></canvas></div>
+        <div class="data-pair"><span>BELEGT / GESAMT</span><b id="ramDetail">N/A</b></div>
+      </article>
+
+      <div class="system-signature">
+        <span>ECHTE WINDOWS-TELEMETRIE</span>
+        <b id="sensorStatus"><i></i>SENSOREN AKTIV</b>
+      </div>
+    </section>
+
+    <section class="hologram-stage" aria-labelledby="hologramTitle">
+      <div class="stage-label">
+        <span id="profileFaction">AUTOBOT // HOLOGRAMM</span>
+        <h1 id="hologramTitle">OPTIMUS PRIME</h1>
+      </div>
+      <img id="factionWatermark" class="faction-watermark" src="assets/autobot-emblem.png" alt="" aria-hidden="true">
+      <div class="projector-top" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="beam" aria-hidden="true"></div>
+      <div id="hologramFrame" class="hologram-frame">
+        <div class="holo-grid" aria-hidden="true"></div>
+        <img id="hologramImage" class="hologram-image" src="assets/optimus-robot.png" alt="Optimus Prime als Roboter">
+        <img id="hologramEcho" class="hologram-image echo" src="assets/optimus-robot.png" alt="" aria-hidden="true">
+        <div class="scan-beam" aria-hidden="true"></div>
+        <div class="target-ring ring-a" aria-hidden="true"></div>
+        <div class="target-ring ring-b" aria-hidden="true"></div>
+      </div>
+      <div class="projection-base" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="form-switch" role="group" aria-label="Transformationsform">
+        <button id="robotMode" class="active" type="button" data-form="robot"><span>01</span>ROBOTERFORM</button>
+        <div class="transform-mark" aria-hidden="true"><i></i><b>⇄</b><i></i></div>
+        <button id="altMode" type="button" data-form="alt"><span>02</span><b id="altModeLabel">ALT-MODE</b></button>
+      </div>
+      <div class="coordinates" aria-hidden="true"><span>CYBERTRON // IACON VECTOR</span><b>37.5027° N &nbsp; 142.3061° E</b></div>
+    </section>
+
+    <section class="operations-rail hud-cut" aria-labelledby="operationsTitle">
+      <div class="rail-title"><span>02</span><h1 id="operationsTitle">OPERATIONEN</h1><i></i></div>
+      <div class="chronometer">
+        <time id="clock">--:--:--</time>
+        <span id="date">DATUM WIRD SYNCHRONISIERT</span>
+        <div><small>UPTIME</small><b id="uptime">00:00:00</b></div>
+      </div>
+
+      <article class="ops-block network-block">
+        <div class="ops-heading"><h2>NETZWERK</h2><span id="adapter">KEIN ADAPTER</span></div>
+        <canvas id="networkChart"></canvas>
+        <div class="traffic"><span>RX <b id="download">0.00 Mbit/s</b></span><span>TX <b id="upload">0.00 Mbit/s</b></span></div>
+      </article>
+
+      <article class="ops-block storage-block">
+        <div class="ops-heading"><h2>DATENTRÄGER</h2><span id="diskName">SYSTEM DISK</span></div>
+        <div class="storage-line"><b id="diskUsed">--%</b><div><i id="diskBar"></i></div><span id="diskCapacity">N/A</span></div>
+        <div class="traffic"><span>LESEN <b id="diskRead">N/A</b></span><span>SCHREIBEN <b id="diskWrite">N/A</b></span></div>
+      </article>
+
+      <article class="process-block">
+        <div class="ops-heading"><h2>PROZESSAKTIVITÄT</h2><span><b id="processCount">0</b> AKTIV</span></div>
+        <table>
+          <thead><tr><th>PID</th><th>NAME</th><th>CPU</th><th>RAM</th><th></th></tr></thead>
+          <tbody id="processRows"></tbody>
+        </table>
+      </article>
+    </section>
+
+    <footer class="telemetry-strip">
+      <div class="live-state"><i></i><strong>TELEMETRIE LIVE</strong></div>
+      <div id="telemetryLog" class="telemetry-log" aria-live="off"></div>
+      <div class="quality"><span id="qualityState">60 FPS // HIGH</span><b>CYBERTRON SYSTEM LINK</b></div>
+    </footer>
+
+    <div id="eventOverlay" class="event-overlay" aria-hidden="true"><span>DATEN-SYNCHRONISIERUNG</span></div>
+    
+    <!-- Random Events -->
+    <div id="transmissionEvent" class="transmission-event" aria-hidden="true">
+      <span>INCOMING TRANSMISSION</span>
+      <b id="transmissionData"></b>
+    </div>
+  </main>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
