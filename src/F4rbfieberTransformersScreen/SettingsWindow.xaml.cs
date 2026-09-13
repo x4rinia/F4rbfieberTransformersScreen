@@ -31,8 +31,6 @@ public partial class SettingsWindow : Window
         Select(QualityCombo, settings.AnimationQuality, useTag: false);
         Select(ProfileModeCombo, settings.ProfileMode, useTag: true);
         Select(TransformerCombo, settings.TransformerProfile, useTag: true);
-        ComicStyleRadio.IsChecked = settings.TransformerStyle != "film";
-        FilmStyleRadio.IsChecked = settings.TransformerStyle == "film";
         Select(TransformationIntervalCombo, settings.TransformationIntervalSeconds.ToString(), useTag: true);
         Select(ProfileCycleIntervalCombo, settings.ProfileCycleIntervalSeconds.ToString(), useTag: true);
         Select(RandomEventsCombo, settings.RandomEvents, useTag: true);
@@ -59,7 +57,6 @@ public partial class SettingsWindow : Window
             AnimationQuality = Selected(QualityCombo, false),
             ProfileMode = Selected(ProfileModeCombo, true),
             TransformerProfile = Selected(TransformerCombo, true),
-            TransformerStyle = FilmStyleRadio.IsChecked == true ? "film" : "comic",
             SelectedTransformerProfiles = SelectedCycleProfiles(),
             TransformationIntervalSeconds = int.TryParse(Selected(TransformationIntervalCombo, true), out var interval) ? interval : 15,
             StartForm = "robot",

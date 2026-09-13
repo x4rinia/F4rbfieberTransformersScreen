@@ -21,7 +21,7 @@ public partial class ScreensaverWindow : Window
 
     public event EventHandler? ExitRequested;
 
-    public ScreensaverWindow(SettingsService settingsService, System.Drawing.Rectangle bounds, bool isBlank = false, bool isSecondary = false)
+    public ScreensaverWindow(SettingsService settingsService, System.Drawing.Rectangle bounds, bool isBlank = false)
     {
         InitializeComponent();
         _previewParent = IntPtr.Zero;
@@ -43,7 +43,7 @@ public partial class ScreensaverWindow : Window
         }
         else
         {
-            Hud.Configure(settingsService, previewMode: false, isSecondary: isSecondary);
+            Hud.Configure(settingsService, previewMode: false);
         }
         
         AttachInputHandlers();

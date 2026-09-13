@@ -28,9 +28,12 @@ public sealed class SettingsService
         try
         {
             if (!File.Exists(_settingsPath)) return new AppSettings();
-            var settings = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(_settingsPath), _jsonOptions)
+            var json = File.ReadAllText(_settingsPath);
+            var settings = JsonSerializer.Deserialize<AppSettings>(json, _jsonOptions)
                            ?? new AppSettings();
             Normalize(settings);
+            using var document = JsonDocument.Parse(json);
+            if (document.RootElement.TryGetProperty("TransformerStyle", out _)) Save(settings);
             return settings;
         }
         catch
@@ -54,6 +57,7 @@ public sealed class SettingsService
         
         settings.TransformerProfile = settings.TransformerProfile?.Trim().ToLowerInvariant() switch
         {
+            "random" => "random",
             "bumblebee" => "bumblebee",
             "grimlock" => "grimlock",
             "hound" => "hound",
@@ -74,13 +78,11 @@ public sealed class SettingsService
         if (settings.SelectedTransformerProfiles.Count == 0)
             settings.SelectedTransformerProfiles.Add(settings.TransformerProfile);
         settings.ProfileMode = settings.ProfileMode?.Trim().ToLowerInvariant() == "cycle" ? "cycle" : "fixed";
-        settings.TransformerStyle = settings.TransformerStyle?.Trim().ToLowerInvariant() == "film" ? "film" : "comic";
         // The form is no longer user-configurable. Every session starts as a robot;
         // the configured transformation interval continues to switch forms automatically.
         settings.StartForm = "robot";
         settings.MonitorTarget = settings.MonitorTarget?.Trim().ToLowerInvariant() switch
         {
-            "all" => "all",
             "2" => "2",
             "3" => "3",
             _ => "1"

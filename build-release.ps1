@@ -237,14 +237,13 @@ $requiredFiles = @(
     (Join-Path $screensaverPayload 'Web\assets\dinobot-emblem.png'),
     (Join-Path $screensaverPayload 'Web\assets\autobot-emblem.png'),
     (Join-Path $screensaverPayload 'Web\assets\decepticon-emblem.png'),
-    (Join-Path $screensaverPayload 'Web\assets\fonts\transformers-movie.ttf'),
     (Join-Path $screensaverPayload 'Web\assets\fonts\optimus.ttf'),
     (Join-Path $screensaverPayload 'Web\assets\fonts\optimus-bold.ttf'),
     (Join-Path $screensaverPayload 'Web\assets\fonts\ancient-autobot.ttf'),
     (Join-Path $screensaverPayload 'Web\js\profiles.js')
 )
 $profileIds = @('grimlock', 'hound', 'optimus', 'bumblebee', 'ironhide', 'jazz', 'megatron', 'shockwave', 'soundwave')
-$profileAssetNames = @('comic-robot.png', 'comic-alt.png', 'film-robot.png', 'film-alt.png')
+$profileAssetNames = @('comic-robot.png', 'comic-alt.png')
 foreach ($profileId in $profileIds) {
     foreach ($assetName in $profileAssetNames) {
         $requiredFiles += Join-Path $screensaverPayload "Web\assets\transformers\$profileId\$assetName"

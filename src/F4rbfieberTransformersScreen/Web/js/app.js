@@ -1,5 +1,5 @@
 import { subscribe, subscribeSettings, getSettings, format, isNativeTelemetry } from './telemetry.js';
-import { PROFILES, getProfile, getProfileAppearance, getProfileAsset, getEnabledProfileIds, normalizeVisualStyle } from './profiles.js';
+import { PROFILES, getProfile, getProfileAppearance, getProfileAsset, getEnabledProfileIds } from './profiles.js';
 
 const $ = selector => document.querySelector(selector);
 const app = $('#app');
@@ -12,7 +12,6 @@ const history = {
 };
 let activeProfile = PROFILES.optimus;
 let activeForm = 'robot';
-let activeVisualStyle = 'comic';
 let lastSample = 0;
 let nextFormSwitch = Number.POSITIVE_INFINITY;
 let nextProfileSwitch = Number.POSITIVE_INFINITY;
@@ -23,8 +22,12 @@ let isEventActive = false;
 let alertCloseTimer = 0;
 let alertProgressAnimation = null;
 let alertAnimationToken = 0;
-const ALERT_PROGRESS_DURATION_MS = 3200;
-const ALERT_COMPLETE_HOLD_MS = 180;
+let alertDecodeTimers = [];
+const ALERT_PROGRESS_DURATION_MS = 4200;
+const ALERT_ENCRYPTED_HOLD_MS = 450;
+const ALERT_DECODE_DURATION_MS = 760;
+const ALERT_COMPLETE_HOLD_MS = 500;
+const DECODE_GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#?/<>'.split('');
 
 for (const profile of Object.values(PROFILES)) {
   const option = document.createElement('option');
@@ -47,7 +50,6 @@ function setProfile(profileId, animate = true, targetForm = activeForm) {
   nextProfileSwitch = Number.POSITIVE_INFINITY;
   app.classList.remove('profile-switch-in');
   app.classList.add('profile-switch-out');
-  showOverlay(`${nextProfile.name} // PROFIL-SYNCHRONISIERUNG`);
 
   window.setTimeout(() => {
     if (transitionToken !== profileTransitionToken) return;
@@ -67,7 +69,7 @@ function commitProfile(profile, targetForm = activeForm) {
   profileSelect.value = activeProfile.id;
   $('#hologramTitle').textContent = activeProfile.name;
   $('#profileFaction').textContent = `${activeProfile.faction} // HOLOGRAMM`;
-  $('#altModeLabel').textContent = getProfileAppearance(activeProfile, activeVisualStyle).altLabel;
+  $('#altModeLabel').textContent = getProfileAppearance(activeProfile).altLabel;
   setFactionLogo($('#headerFactionLogo'), activeProfile.factionLogo);
   setFactionLogo($('#factionWatermark'), activeProfile.factionLogo);
   setForm(targetForm === 'alt' ? 'alt' : 'robot', false);
@@ -99,25 +101,11 @@ function setFactionLogo(image, source) {
 }
 
 function applyPalette() {
-  const appearance = getProfileAppearance(activeProfile, activeVisualStyle);
+  const appearance = getProfileAppearance(activeProfile);
   app.style.setProperty('--primary', appearance.primary);
   app.style.setProperty('--secondary', appearance.secondary);
   app.style.setProperty('--accent', appearance.accent);
   app.style.setProperty('--ink', appearance.ink);
-}
-
-function setVisualStyle(style, animate = true, persist = false) {
-  activeVisualStyle = normalizeVisualStyle(style);
-  app.dataset.visualStyle = activeVisualStyle;
-  $('#comicStyle').classList.toggle('active', activeVisualStyle === 'comic');
-  $('#filmStyle').classList.toggle('active', activeVisualStyle === 'film');
-  $('#altModeLabel').textContent = getProfileAppearance(activeProfile, activeVisualStyle).altLabel;
-  applyPalette();
-  setForm(activeForm, animate);
-  if (persist) {
-    window.chrome?.webview?.postMessage({ command: 'setTransformerStyle', value: activeVisualStyle });
-    showOverlay(`${activeVisualStyle === 'comic' ? 'COMIC' : 'FILM'} // ASSET-MATRIX AKTIV`);
-  }
 }
 
 function setForm(form, animate = true) {
@@ -130,13 +118,12 @@ function setForm(form, animate = true) {
     void frame.offsetWidth;
     frame.classList.add('transforming');
   }
-  const source = getProfileAsset(activeProfile, activeVisualStyle, activeForm);
+  const source = getProfileAsset(activeProfile, activeForm);
   image.src = source;
-  const styleLabel = activeVisualStyle === 'comic' ? 'Comic' : 'Film';
-  const altLabel = getProfileAppearance(activeProfile, activeVisualStyle).altLabel;
+  const altLabel = getProfileAppearance(activeProfile).altLabel;
   image.alt = activeForm === 'robot'
-    ? `${activeProfile.name} als ${styleLabel}-Roboter`
-    : `${activeProfile.name} im ${styleLabel}-Alt-Mode ${altLabel}`;
+    ? `${activeProfile.name} als Comic-Roboter`
+    : `${activeProfile.name} im Comic-Alt-Mode ${altLabel}`;
   echo.src = source;
   app.dataset.form = activeForm;
   $('#robotMode').classList.toggle('active', activeForm === 'robot');
@@ -147,8 +134,6 @@ profileSelect.addEventListener('change', () => {
   setProfile(profileSelect.value);
   window.chrome?.webview?.postMessage({ command: 'setTransformerProfile', value: profileSelect.value });
 });
-$('#comicStyle').addEventListener('click', () => setVisualStyle('comic', true, true));
-$('#filmStyle').addEventListener('click', () => setVisualStyle('film', true, true));
 $('#robotMode').addEventListener('click', () => { setForm('robot'); scheduleFormSwitch(); });
 $('#altMode').addEventListener('click', () => { setForm('alt'); scheduleFormSwitch(); });
 
@@ -264,12 +249,13 @@ subscribeSettings(settings => {
   const fps = isEco ? 24 : (settings.targetFps || 60);
   const qual = isEco ? 'ECO-MODE' : (settings.animationQuality || 'High').toUpperCase();
   $('#qualityState').textContent = `${fps} FPS // ${qual}`;
-  const configuredProfile = getProfile(settings.transformerProfile || 'optimus').id;
+  const configuredProfile = settings.transformerProfile === 'random'
+    ? activeProfile.id
+    : getProfile(settings.transformerProfile || 'optimus').id;
   const enabledProfileIds = getEnabledProfileIds(settings, configuredProfile);
   const initialProfile = settings.profileMode === 'cycle' && !enabledProfileIds.includes(configuredProfile)
     ? enabledProfileIds[0]
     : configuredProfile;
-  setVisualStyle(settings.transformerStyle, false);
   setProfile(initialProfile, false, settings.startForm);
 });
 
@@ -284,7 +270,6 @@ subscribe((data) => {
   if (now >= nextFormSwitch) {
     setForm(activeForm === 'robot' ? 'alt' : 'robot');
     scheduleFormSwitch();
-    showOverlay(`${activeProfile.name} // TRANSFORMATIONS-MATRIX`);
   }
   if (now - lastLog > 4800) {
     lastLog = now;
@@ -292,14 +277,6 @@ subscribe((data) => {
     addLog(messages[Math.floor(Math.random() * messages.length)]);
   }
 });
-
-function showOverlay(text) {
-  if (getSettings().enableEvents === false) return;
-  const overlay = $('#eventOverlay');
-  overlay.querySelector('span').textContent = text;
-  overlay.classList.add('visible');
-  setTimeout(() => overlay.classList.remove('visible'), 1800);
-}
 
 function compactWindows(value) {
   const text = String(value || 'WINDOWS').toUpperCase();
@@ -313,6 +290,11 @@ function escapeHtml(value) {
 
 window.addEventListener('keydown', event => {
   if (event.key === 'Enter' || event.key === 'Escape') window.chrome?.webview?.postMessage({ command: 'exit' });
+});
+
+window.addEventListener('pointerdown', event => {
+  if (event.button !== 0 || event.target.closest('button, select, option')) return;
+  window.chrome?.webview?.postMessage({ command: 'exit' });
 });
 
 function triggerRandomEvent(manual = false) {
@@ -348,14 +330,24 @@ function showCyberAlert(code, title, detail, tone, onClose) {
   const meter = $('#alertMeter');
   const animationToken = ++alertAnimationToken;
   clearTimeout(alertCloseTimer);
+  alertDecodeTimers.forEach(clearTimeout);
+  alertDecodeTimers = [];
   alertProgressAnimation?.cancel();
-  $('#alertCode').textContent = code;
-  $('#alertTitle').textContent = title;
-  $('#alertDetail').textContent = detail;
+  const decodedElements = [
+    prepareDecodedText($('#alertCode'), code),
+    prepareDecodedText($('#alertTitle'), title),
+    prepareDecodedText($('#alertDetail'), detail)
+  ];
   meter.style.width = '0%';
   alert.dataset.tone = tone;
+  alert.dataset.decodeState = 'encrypted';
   alert.classList.add('visible');
   alert.setAttribute('aria-hidden', 'false');
+  alertDecodeTimers.push(window.setTimeout(() => {
+    if (animationToken !== alertAnimationToken) return;
+    alert.dataset.decodeState = 'decoding';
+    decodeAlertText(decodedElements, animationToken);
+  }, ALERT_ENCRYPTED_HOLD_MS));
 
   const closeAfterCompletion = () => {
     if (animationToken !== alertAnimationToken) return;
@@ -366,6 +358,7 @@ function showCyberAlert(code, title, detail, tone, onClose) {
       if (animationToken !== alertAnimationToken) return;
       alert.classList.remove('visible');
       alert.setAttribute('aria-hidden', 'true');
+      delete alert.dataset.decodeState;
       meter.style.width = '0%';
       onClose?.();
       isEventActive = false;
@@ -384,6 +377,45 @@ function showCyberAlert(code, title, detail, tone, onClose) {
     requestAnimationFrame(() => requestAnimationFrame(() => { meter.style.width = '100%'; }));
     alertCloseTimer = window.setTimeout(closeAfterCompletion, ALERT_PROGRESS_DURATION_MS);
   }
+}
+
+function prepareDecodedText(element, value) {
+  const characters = Array.from(value);
+  element.replaceChildren(...characters.map(character => {
+    const span = document.createElement('span');
+    span.className = 'decoded-character';
+    span.textContent = character;
+    if (character === ' ') span.classList.add('space');
+    return span;
+  }));
+  element.setAttribute('aria-label', value);
+  return { element, characters, spans: [...element.children] };
+}
+
+function decodeAlertText(groups, animationToken) {
+  const characters = groups.flatMap(group => group.spans
+    .map((span, index) => ({ span, finalCharacter: group.characters[index] }))
+    .filter(item => item.finalCharacter !== ' '));
+  const step = ALERT_DECODE_DURATION_MS / Math.max(1, characters.length);
+
+  characters.forEach((item, index) => {
+    alertDecodeTimers.push(window.setTimeout(() => {
+      if (animationToken !== alertAnimationToken) return;
+      item.span.textContent = DECODE_GLYPHS[Math.floor(Math.random() * DECODE_GLYPHS.length)];
+      item.span.classList.add('decoding');
+      alertDecodeTimers.push(window.setTimeout(() => {
+        if (animationToken !== alertAnimationToken) return;
+        item.span.textContent = item.finalCharacter;
+        item.span.classList.remove('decoding');
+        item.span.classList.add('decoded');
+      }, 70));
+    }, Math.round(index * step)));
+  });
+
+  alertDecodeTimers.push(window.setTimeout(() => {
+    if (animationToken !== alertAnimationToken) return;
+    $('#cyberAlert').dataset.decodeState = 'readable';
+  }, ALERT_DECODE_DURATION_MS + 90));
 }
 
 function scheduleRandomEvent() {

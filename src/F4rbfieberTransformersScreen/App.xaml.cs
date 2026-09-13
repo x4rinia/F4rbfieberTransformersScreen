@@ -66,24 +66,20 @@ public partial class App : System.Windows.Application
         var screens = Forms.Screen.AllScreens
             .OrderBy(screen => GetDisplayNumber(screen.DeviceName))
             .ToArray();
-        int? requestedDisplay = settings.MonitorTarget == "all"
-            ? null
-            : int.TryParse(settings.MonitorTarget, out var displayNumber) ? displayNumber : 1;
-        var requestedDisplayExists = requestedDisplay is null || screens.Any(screen => GetDisplayNumber(screen.DeviceName) == requestedDisplay);
+        var requestedDisplay = int.TryParse(settings.MonitorTarget, out var displayNumber) ? displayNumber : 1;
+        var requestedDisplayExists = screens.Any(screen => GetDisplayNumber(screen.DeviceName) == requestedDisplay);
         var fallbackScreen = screens.FirstOrDefault(screen => GetDisplayNumber(screen.DeviceName) == 1)
                              ?? screens.FirstOrDefault(screen => screen.Primary)
                              ?? screens.First();
 
         foreach (var screen in screens)
         {
-            var isActive = settings.MonitorTarget == "all"
-                           || (requestedDisplayExists
-                               ? GetDisplayNumber(screen.DeviceName) == requestedDisplay
-                               : screen.DeviceName == fallbackScreen.DeviceName);
-            var isSecondary = settings.MonitorTarget == "all" && screen.DeviceName != fallbackScreen.DeviceName;
+            var isActive = requestedDisplayExists
+                ? GetDisplayNumber(screen.DeviceName) == requestedDisplay
+                : screen.DeviceName == fallbackScreen.DeviceName;
             var isBlank = !isActive;
 
-            var window = new ScreensaverWindow(_settingsService, screen.Bounds, isBlank, isSecondary);
+            var window = new ScreensaverWindow(_settingsService, screen.Bounds, isBlank);
             window.ExitRequested += ExitScreensaver;
             _windows.Add(window);
             window.Show();

@@ -4,14 +4,15 @@
         Title="Transformers Screensaver // Einstellungen"
         Width="780" Height="840" MinWidth="680" MinHeight="650"
         ResizeMode="CanResizeWithGrip" WindowStartupLocation="CenterScreen"
-        Background="#03080D" Foreground="#E8F5FB">
+        Background="#03080D" Foreground="#E8F5FB"
+        FontFamily="./Web/assets/fonts/#Optimus">
     <Window.Resources>
         <SolidColorBrush x:Key="Panel" Color="#07131D" />
         <SolidColorBrush x:Key="Line" Color="#315B72" />
         <SolidColorBrush x:Key="Accent" Color="#65D9FF" />
 
         <Style TargetType="TextBlock">
-            <Setter Property="FontFamily" Value="Bahnschrift, Segoe UI" />
+            <Setter Property="FontFamily" Value="./Web/assets/fonts/#Optimus" />
         </Style>
         <Style x:Key="FieldLabel" TargetType="TextBlock">
             <Setter Property="Foreground" Value="#91B3C5" />
@@ -26,7 +27,7 @@
             <Setter Property="Margin" Value="0,0,0,16" />
         </Style>
         <Style TargetType="ComboBox">
-            <Setter Property="FontFamily" Value="Segoe UI" />
+            <Setter Property="FontFamily" Value="./Web/assets/fonts/#Optimus" />
             <Setter Property="FontSize" Value="14" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Height" Value="40" />
@@ -102,7 +103,7 @@
             </Setter>
         </Style>
         <Style TargetType="ComboBoxItem">
-            <Setter Property="FontFamily" Value="Segoe UI" />
+            <Setter Property="FontFamily" Value="./Web/assets/fonts/#Optimus" />
             <Setter Property="FontSize" Value="14" />
             <Setter Property="Foreground" Value="#FFFFFF" />
             <Setter Property="Background" Value="#081720" />
@@ -139,7 +140,7 @@
             </Setter>
         </Style>
         <Style TargetType="CheckBox">
-            <Setter Property="FontFamily" Value="Segoe UI" />
+            <Setter Property="FontFamily" Value="./Web/assets/fonts/#Optimus" />
             <Setter Property="Foreground" Value="#FFFFFF" />
             <Setter Property="FontSize" Value="14" />
             <Setter Property="FontWeight" Value="SemiBold" />
@@ -183,7 +184,7 @@
             </Setter>
         </Style>
         <Style TargetType="Button">
-            <Setter Property="FontFamily" Value="Segoe UI" />
+            <Setter Property="FontFamily" Value="./Web/assets/fonts/#Optimus" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="FontSize" Value="13" />
             <Setter Property="Padding" Value="18,10" />
@@ -191,6 +192,9 @@
             <Setter Property="Background" Value="#0B1B27" />
             <Setter Property="Foreground" Value="#F0FAFF" />
             <Setter Property="BorderBrush" Value="#4D849F" />
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="FontFamily" Value="./Web/assets/fonts/#Optimus" />
         </Style>
         <Style x:Key="Section" TargetType="Border">
             <Setter Property="Background" Value="#07131D" />
@@ -236,10 +240,6 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="18" />
                                 <RowDefinition Height="Auto" />
-                                <RowDefinition Height="18" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="12" />
-                                <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
                             <StackPanel>
@@ -252,6 +252,7 @@
                             <StackPanel Grid.Column="2">
                                 <TextBlock Style="{StaticResource FieldLabel}" Text="START-/STANDARD-TRANSFORMER" />
                                 <ComboBox x:Name="TransformerCombo">
+                                    <ComboBoxItem Content="Zufällig bei jedem Start" Tag="random" />
                                     <ComboBoxItem Content="Grimlock // Dinobot" Tag="grimlock" />
                                     <ComboBoxItem Content="Hound // Autobot" Tag="hound" />
                                     <ComboBoxItem Content="Optimus Prime // Autobot" Tag="optimus" />
@@ -283,15 +284,6 @@
                                     <ComboBoxItem Content="Alle 30 Sekunden" Tag="30" />
                                 </ComboBox>
                             </StackPanel>
-                            <StackPanel Grid.Row="4" Grid.ColumnSpan="3">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="STIL" />
-                                <StackPanel Orientation="Horizontal">
-                                    <RadioButton x:Name="ComicStyleRadio" GroupName="TransformerStyle" Content="Comic" IsChecked="True" Margin="0,0,22,0" />
-                                    <RadioButton x:Name="FilmStyleRadio" GroupName="TransformerStyle" Content="Film" />
-                                </StackPanel>
-                            </StackPanel>
-                            <TextBlock Grid.Row="6" Grid.ColumnSpan="3" Foreground="#8BA9BA" FontSize="11" TextWrapping="Wrap"
-                                       Text="Comic und Film sind exklusiv auswählbar. Der automatische Wechsel zwischen Roboterform und Alt-Form funktioniert unabhängig davon weiter." />
                         </Grid>
 
                         <Border x:Name="ProfileCycleSelectionPanel" Margin="0,20,0,0" Padding="14"
@@ -325,7 +317,6 @@
                             <ComboBoxItem Content="Nur Monitor 1 (Standard)" Tag="1" />
                             <ComboBoxItem Content="Nur Monitor 2" Tag="2" />
                             <ComboBoxItem Content="Nur Monitor 3" Tag="3" />
-                            <ComboBoxItem Content="Alle Monitore" Tag="all" />
                         </ComboBox>
                         <TextBlock Margin="0,10,0,0" Foreground="#8BA9BA" FontSize="12" TextWrapping="Wrap"
                                    Text="Nicht ausgewählte Monitore bleiben vollständig schwarz. Ist der gewählte Monitor nicht vorhanden, wird automatisch Monitor 1 verwendet." />

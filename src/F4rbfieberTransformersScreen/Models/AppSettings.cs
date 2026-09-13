@@ -15,7 +15,6 @@ public sealed class AppSettings
     public int ProfileCycleIntervalSeconds { get; set; } = 60;
     public string ProfileMode { get; set; } = "fixed";
     public string TransformerProfile { get; set; } = "optimus";
-    public string TransformerStyle { get; set; } = "comic";
     public List<string> SelectedTransformerProfiles { get; set; } =
         ["grimlock", "hound", "optimus", "bumblebee", "ironhide", "jazz", "megatron", "shockwave", "soundwave"];
     public string RandomEvents { get; set; } = "normal";

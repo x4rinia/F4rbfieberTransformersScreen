@@ -2,14 +2,8 @@ const palette = (primary, secondary, accent, ink = '#f3f8ff') =>
   Object.freeze({ primary, secondary, accent, ink });
 
 const imageSet = id => Object.freeze({
-  comic: Object.freeze({
-    robot: `assets/transformers/${id}/comic-robot.png`,
-    alt: `assets/transformers/${id}/comic-alt.png`
-  }),
-  film: Object.freeze({
-    robot: `assets/transformers/${id}/film-robot.png`,
-    alt: `assets/transformers/${id}/film-alt.png`
-  })
+  robot: `assets/transformers/${id}/comic-robot.png`,
+  alt: `assets/transformers/${id}/comic-alt.png`
 });
 
 export const PROFILES = Object.freeze({
@@ -18,11 +12,8 @@ export const PROFILES = Object.freeze({
     name: 'GRIMLOCK',
     faction: 'DINOBOT',
     images: imageSet('grimlock'),
-    altLabels: { comic: 'T-REX', film: 'T-REX' },
-    palettes: {
-      comic: palette('#d9dde4', '#e2b423', '#7fdcff'),
-      film: palette('#a67b3f', '#4b5158', '#f0c86d')
-    },
+    altLabel: 'T-REX',
+    colors: palette('#d9dde4', '#e2b423', '#7fdcff'),
     factionLogo: 'assets/dinobot-emblem.png'
   },
   hound: {
@@ -30,11 +21,8 @@ export const PROFILES = Object.freeze({
     name: 'HOUND',
     faction: 'AUTOBOT',
     images: imageSet('hound'),
-    altLabels: { comic: 'MILITÄR-JEEP', film: 'TAKTIK-JEEP' },
-    palettes: {
-      comic: palette('#668f32', '#d2c7a4', '#b9e66f'),
-      film: palette('#596b3b', '#8b7658', '#b7d875')
-    },
+    altLabel: 'MILITÄR-JEEP',
+    colors: palette('#668f32', '#d2c7a4', '#b9e66f'),
     factionLogo: 'assets/autobot-emblem.png'
   },
   optimus: {
@@ -42,11 +30,8 @@ export const PROFILES = Object.freeze({
     name: 'OPTIMUS PRIME',
     faction: 'AUTOBOT',
     images: imageSet('optimus'),
-    altLabels: { comic: 'SATTELSCHLEPPER', film: 'PETERBILT-TRUCK' },
-    palettes: {
-      comic: palette('#df3338', '#1d58b5', '#70c7ff'),
-      film: palette('#245394', '#bd3439', '#71bcff')
-    },
+    altLabel: 'SATTELSCHLEPPER',
+    colors: palette('#df3338', '#1d58b5', '#70c7ff'),
     factionLogo: 'assets/autobot-emblem.png'
   },
   bumblebee: {
@@ -54,11 +39,8 @@ export const PROFILES = Object.freeze({
     name: 'BUMBLEBEE',
     faction: 'AUTOBOT',
     images: imageSet('bumblebee'),
-    altLabels: { comic: 'VW KÄFER', film: 'CAMARO' },
-    palettes: {
-      comic: palette('#f2c514', '#30353d', '#fff17b', '#fffbe2'),
-      film: palette('#d9a80e', '#292d31', '#ffe06a', '#fff9d9')
-    },
+    altLabel: 'VW KÄFER',
+    colors: palette('#f2c514', '#30353d', '#fff17b', '#fffbe2'),
     factionLogo: 'assets/autobot-emblem.png'
   },
   ironhide: {
@@ -66,11 +48,8 @@ export const PROFILES = Object.freeze({
     name: 'IRONHIDE',
     faction: 'AUTOBOT',
     images: imageSet('ironhide'),
-    altLabels: { comic: 'TRANSPORTER', film: 'TAKTIK-PICKUP' },
-    palettes: {
-      comic: palette('#d92832', '#333a43', '#75c9ff'),
-      film: palette('#343a40', '#a43135', '#ff6a68')
-    },
+    altLabel: 'TRANSPORTER',
+    colors: palette('#d92832', '#333a43', '#75c9ff'),
     factionLogo: 'assets/autobot-emblem.png'
   },
   jazz: {
@@ -78,11 +57,8 @@ export const PROFILES = Object.freeze({
     name: 'JAZZ',
     faction: 'AUTOBOT',
     images: imageSet('jazz'),
-    altLabels: { comic: 'SPORTWAGEN', film: 'PONTIAC SOLSTICE' },
-    palettes: {
-      comic: palette('#e5e8ea', '#2359a8', '#f04a43'),
-      film: palette('#aeb5bd', '#313942', '#68b8ff')
-    },
+    altLabel: 'SPORTWAGEN',
+    colors: palette('#e5e8ea', '#2359a8', '#f04a43'),
     factionLogo: 'assets/autobot-emblem.png'
   },
   megatron: {
@@ -90,11 +66,8 @@ export const PROFILES = Object.freeze({
     name: 'MEGATRON',
     faction: 'DECEPTICON',
     images: imageSet('megatron'),
-    altLabels: { comic: 'LASERPISTOLE', film: 'CYBERTRON-JET' },
-    palettes: {
-      comic: palette('#c6c9cd', '#34363d', '#f14a55'),
-      film: palette('#7e858c', '#2b2e34', '#ff3544')
-    },
+    altLabel: 'LASERPISTOLE',
+    colors: palette('#c6c9cd', '#34363d', '#f14a55'),
     factionLogo: 'assets/decepticon-emblem.png'
   },
   shockwave: {
@@ -102,11 +75,8 @@ export const PROFILES = Object.freeze({
     name: 'SHOCKWAVE',
     faction: 'DECEPTICON',
     images: imageSet('shockwave'),
-    altLabels: { comic: 'LASERKANONE', film: 'HOVERTANK' },
-    palettes: {
-      comic: palette('#65329a', '#b52aaf', '#ff69e1'),
-      film: palette('#47335f', '#b829a4', '#f45bd7')
-    },
+    altLabel: 'LASERKANONE',
+    colors: palette('#65329a', '#b52aaf', '#ff69e1'),
     factionLogo: 'assets/decepticon-emblem.png'
   },
   soundwave: {
@@ -114,37 +84,28 @@ export const PROFILES = Object.freeze({
     name: 'SOUNDWAVE',
     faction: 'DECEPTICON',
     images: imageSet('soundwave'),
-    altLabels: { comic: 'KASSETTENDECK', film: 'CYBERTRON-SUPERCAR' },
-    palettes: {
-      comic: palette('#174b91', '#d1d6dc', '#f0be32'),
-      film: palette('#3e4855', '#1f4f99', '#72a8ff')
-    },
+    altLabel: 'KASSETTENDECK',
+    colors: palette('#174b91', '#d1d6dc', '#f0be32'),
     factionLogo: 'assets/decepticon-emblem.png'
   }
 });
 
 export const PROFILE_IDS = Object.freeze(Object.keys(PROFILES));
 
-export function normalizeVisualStyle(style) {
-  return String(style || '').toLowerCase() === 'film' ? 'film' : 'comic';
-}
-
 export function getProfile(id) {
   return PROFILES[String(id || '').toLowerCase()] || PROFILES.optimus;
 }
 
-export function getProfileAppearance(profile, visualStyle) {
-  const style = normalizeVisualStyle(visualStyle);
+export function getProfileAppearance(profile) {
   return {
-    ...profile.palettes[style],
-    altLabel: profile.altLabels[style]
+    ...profile.colors,
+    altLabel: profile.altLabel
   };
 }
 
-export function getProfileAsset(profile, visualStyle, form) {
-  const style = normalizeVisualStyle(visualStyle);
+export function getProfileAsset(profile, form) {
   const normalizedForm = form === 'alt' ? 'alt' : 'robot';
-  return profile.images[style][normalizedForm];
+  return profile.images[normalizedForm];
 }
 
 export function getEnabledProfileIds(settings, fallbackProfileId = 'optimus') {

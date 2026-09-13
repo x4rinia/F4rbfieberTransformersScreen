@@ -21,12 +21,26 @@ const fallback = {
 
 let target = structuredClone(fallback);
 let display = structuredClone(fallback);
+const parseUptimeSeconds = value => {
+  const parts = String(value || '').split(':').map(Number);
+  return parts.length === 3 && parts.every(Number.isFinite)
+    ? parts[0] * 3600 + parts[1] * 60 + parts[2]
+    : 0;
+};
+const formatUptime = seconds => {
+  const wholeSeconds = Math.max(0, Math.floor(seconds));
+  const hours = Math.floor(wholeSeconds / 3600).toString().padStart(2, '0');
+  const minutes = Math.floor(wholeSeconds % 3600 / 60).toString().padStart(2, '0');
+  const remainingSeconds = (wholeSeconds % 60).toString().padStart(2, '0');
+  return `${hours}:${minutes}:${remainingSeconds}`;
+};
+let uptimeAnchorSeconds = parseUptimeSeconds(fallback.uptime);
+let uptimeAnchorAt = performance.now();
 const startupParameters = new URLSearchParams(window.location.search);
 let settings = {
   targetFps: 60,
   animationQuality: 'High',
   transformerProfile: startupParameters.get('profile') || 'optimus',
-  transformerStyle: startupParameters.get('style') === 'film' ? 'film' : 'comic',
   transformationIntervalSeconds: 15,
   startForm: startupParameters.get('form') === 'alt' ? 'alt' : 'robot',
   profileMode: 'fixed',
@@ -55,6 +69,8 @@ function onMessage(message) {
   if (message.type === 'telemetry' && message.payload) {
     receivedNativeTelemetry = true;
     mergeTelemetry(message.payload);
+    uptimeAnchorSeconds = parseUptimeSeconds(message.payload.uptime);
+    uptimeAnchorAt = performance.now();
   }
   if (message.type === 'settings' && message.payload) {
     settings = { ...settings, ...message.payload };
@@ -88,7 +104,7 @@ function interpolate(now) {
   display.timestamp = target.timestamp;
   display.computerName = target.computerName;
   display.windowsVersion = target.windowsVersion;
-  display.uptime = target.uptime;
+  display.uptime = formatUptime(uptimeAnchorSeconds + (now - uptimeAnchorAt) / 1000);
   display.processes = target.processes || [];
   display.cpu.name = target.cpu.name;
   display.cpu.cores = target.cpu.cores || [];

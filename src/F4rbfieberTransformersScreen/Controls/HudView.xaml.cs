@@ -11,10 +11,14 @@ namespace F4rbfieberTransformersScreen.Controls;
 
 public partial class HudView : System.Windows.Controls.UserControl, IDisposable
 {
+    private static readonly string[] ProfileIds =
+        ["grimlock", "hound", "optimus", "bumblebee", "ironhide", "jazz", "megatron", "shockwave", "soundwave"];
     private static readonly Lazy<Task<CoreWebView2Environment>> SharedWebViewEnvironment =
         new(CreateWebViewEnvironmentAsync);
     private static readonly object SharedTelemetryLock = new();
+    private static readonly object RandomProfileLock = new();
     private static Task<TelemetryService>? SharedTelemetryInitialization;
+    private static string? SharedRandomProfile;
 
     private readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web);
     private readonly DispatcherTimer _timer;
@@ -23,7 +27,6 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
     private SettingsService? _settingsService;
     private AppSettings _settings = new();
     private bool _previewMode;
-    private bool _isSecondary;
     private bool _ready;
     private bool _disposed;
     private bool _ownsTelemetry;
@@ -63,11 +66,10 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
             }, TaskScheduler.Default);
     }
 
-    public void Configure(SettingsService settingsService, bool previewMode, bool isSecondary = false)
+    public void Configure(SettingsService settingsService, bool previewMode)
     {
         _settingsService = settingsService;
         _previewMode = previewMode;
-        _isSecondary = isSecondary;
         _settings = settingsService.Load();
         _timer.Interval = _settings.EnergySavingMode ? TimeSpan.FromMilliseconds(2000) : TimeSpan.FromMilliseconds(750);
     }
@@ -111,17 +113,12 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
             Browser.CoreWebView2.SetVirtualHostNameToFolderMapping(
                 "cybertron.local", webRoot, CoreWebView2HostResourceAccessKind.DenyCors);
             
-            var isSingleMonitor = System.Windows.Forms.Screen.AllScreens.Length == 1 || _settings.MonitorTarget != "all";
             var initialProfile = ResolveInitialProfile(_settings);
             var query = new List<string>
             {
                 $"profile={Uri.EscapeDataString(initialProfile)}",
-                $"form={Uri.EscapeDataString(_settings.StartForm)}",
-                $"style={Uri.EscapeDataString(_settings.TransformerStyle)}"
+                $"form={Uri.EscapeDataString(_settings.StartForm)}"
             };
-            if (_isSecondary) query.Add("secondary=1");
-            else if (isSingleMonitor) query.Add("singleMonitor=1");
-            else query.Add("primaryMulti=1");
             var url = $"https://cybertron.local/index.html?{string.Join('&', query)}";
             Browser.Source = new Uri(url);
 
@@ -148,6 +145,15 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
 
     private static string ResolveInitialProfile(AppSettings settings)
     {
+        if (string.Equals(settings.TransformerProfile, "random", StringComparison.OrdinalIgnoreCase))
+        {
+            var candidates = string.Equals(settings.ProfileMode, "cycle", StringComparison.OrdinalIgnoreCase)
+                ? settings.SelectedTransformerProfiles.Where(ProfileIds.Contains).ToArray()
+                : ProfileIds;
+            if (candidates.Length == 0) candidates = ["optimus"];
+            lock (RandomProfileLock)
+                return SharedRandomProfile ??= candidates[Random.Shared.Next(candidates.Length)];
+        }
         if (!string.Equals(settings.ProfileMode, "cycle", StringComparison.OrdinalIgnoreCase))
             return settings.TransformerProfile;
         return settings.SelectedTransformerProfiles.Contains(settings.TransformerProfile, StringComparer.OrdinalIgnoreCase)
@@ -224,15 +230,6 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
             var command = document.RootElement.TryGetProperty("command", out var value) ? value.GetString() : null;
             if (command == "openSettings" && !_previewMode)
                 SettingsRequested?.Invoke(this, EventArgs.Empty);
-            else if (command == "setTransformerStyle" && document.RootElement.TryGetProperty("value", out var styleValue))
-            {
-                var style = styleValue.GetString();
-                if (style is "comic" or "film" && _settingsService is not null)
-                {
-                    _settings.TransformerStyle = style;
-                    _settingsService.Save(_settings);
-                }
-            }
             else if (command == "setTransformerProfile" && document.RootElement.TryGetProperty("value", out var profileValue))
             {
                 var profile = profileValue.GetString();
