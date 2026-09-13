@@ -1,27 +1,27 @@
 # Transformers Screensaver
 
-Ein eigenständiger Windows-Bildschirmschoner im Cybertron-Stil. Transformer-Hologramme verbinden sich mit echten System- und PC-Daten zu einem animierten HUD.
+A standalone Windows screensaver in a Cybertron-inspired style. Animated Transformer holograms are combined with real system and PC telemetry in a futuristic HUD.
 
-![Transformers Screensaver mit Optimus Prime und Vorschau-Daten](docs/transformers-screen-demo.png)
+![Transformers Screensaver featuring Optimus Prime and sample data](docs/transformers-screen-demo.png)
 
-> Der Screenshot zeigt die integrierten Vorschau-/Fake-Daten. Im installierten Bildschirmschoner werden auf Wunsch die Telemetriedaten des eigenen Windows-PCs angezeigt.
+> The screenshot uses the built-in preview/sample data. The installed screensaver can display telemetry from your own Windows PC instead.
 
 ## Features
 
-- Comic-only Darstellung mit lokalen Roboter- und Alt-Form-Assets
-- Roboterform und Alt-Form für jeden Transformer
-- Automatischer Wechsel zwischen Roboter- und Alt-Form
-- Festes Transformer-Profil oder automatischer Profilwechsel
-- Individuelle, zum Transformer passende HUD-Farben
-- Eingebundene Cybertron-Schriften für Überschriften und Design-Akzente
-- Energon Alert und Decepticons Angriff
-- Echte Daten für CPU, GPU, Temperaturen, RAM, Netzwerk, Datenträger und Prozesse
-- Uhrzeit, Datum, Windows-Version, Hostname und Systemlaufzeit
-- Auswahl des Zielmonitors und Unterstützung mehrerer Monitore
-- Lokale Assets und offline lauffähige Oberfläche
-- Unterstützung der Windows-Bildschirmschonermodi `/s`, `/c` und `/p`
+- Comic-only presentation using local robot and alternate-mode assets
+- Robot and alternate forms for every Transformer
+- Automatic switching between robot and alternate forms
+- Fixed Transformer profiles or automatic profile cycling
+- Individual HUD colors matched to each Transformer
+- Bundled Cybertron-style fonts for headings and visual accents
+- Energon Alert and Decepticon attack events
+- Live CPU, GPU, temperature, RAM, network, storage, and process data
+- Time, date, Windows version, hostname, and system uptime
+- Target-monitor selection and multi-monitor support
+- Local assets and an offline-capable interface
+- Support for the Windows screensaver modes `/s`, `/c`, and `/p`
 
-## Transformer
+## Transformers
 
 - Optimus Prime
 - Bumblebee
@@ -35,15 +35,15 @@ Ein eigenständiger Windows-Bildschirmschoner im Cybertron-Stil. Transformer-Hol
 
 ## Installation
 
-1. Die aktuelle ZIP unter [Releases](https://github.com/x4rinia/Transformers_Screensaver/releases) herunterladen und vollständig entpacken.
-2. `Install-Screensaver.bat` als Administrator ausführen.
-3. Den Bildschirmschoner anschließend in den Windows-Bildschirmschonereinstellungen auswählen und konfigurieren.
+1. Download the latest ZIP from [Releases](https://github.com/x4rinia/Transformers_Screensaver/releases) and extract it completely.
+2. Run `Install-Screensaver.bat` as administrator.
+3. Select and configure the screensaver in the Windows screensaver settings.
 
-Zum Entfernen dient `Uninstall-Screensaver.bat`.
+Run `Uninstall-Screensaver.bat` to remove it.
 
-## Selbst bauen
+## Build from source
 
-Voraussetzungen sind Windows 10 oder 11 und das .NET 8 SDK.
+Windows 10 or 11 and the .NET 8 SDK are required.
 
 ```powershell
 dotnet build
@@ -53,4 +53,4 @@ dotnet build
 powershell -ExecutionPolicy Bypass -File .\build-release.ps1
 ```
 
-Das Release-Skript erstellt den vollständigen Windows-Payload, `Transformers.scr` sowie Installations- und Deinstallationsskript im lokalen `release`-Ordner.
+The release script creates the complete Windows payload, `Transformers.scr`, and the installation and uninstallation scripts in the local `release` directory.
