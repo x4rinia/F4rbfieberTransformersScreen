@@ -7,7 +7,7 @@ namespace F4rbfieberTransformersScreen.Services;
 public sealed class SettingsService
 {
     private static readonly string[] ProfileIds =
-        ["grimlock", "hound", "optimus", "bumblebee", "megatron", "shockwave"];
+        ["grimlock", "hound", "optimus", "bumblebee", "ironhide", "jazz", "megatron", "shockwave", "soundwave"];
 
     private readonly string _settingsPath;
     private readonly JsonSerializerOptions _jsonOptions = new() { WriteIndented = true };
@@ -57,8 +57,11 @@ public sealed class SettingsService
             "bumblebee" => "bumblebee",
             "grimlock" => "grimlock",
             "hound" => "hound",
+            "ironhide" => "ironhide",
+            "jazz" => "jazz",
             "megatron" => "megatron",
             "shockwave" => "shockwave",
+            "soundwave" => "soundwave",
             _ => "optimus"
         };
         var validProfileIds = ProfileIds.ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -71,7 +74,10 @@ public sealed class SettingsService
         if (settings.SelectedTransformerProfiles.Count == 0)
             settings.SelectedTransformerProfiles.Add(settings.TransformerProfile);
         settings.ProfileMode = settings.ProfileMode?.Trim().ToLowerInvariant() == "cycle" ? "cycle" : "fixed";
-        settings.StartForm = settings.StartForm?.Trim().ToLowerInvariant() == "alt" ? "alt" : "robot";
+        settings.TransformerStyle = settings.TransformerStyle?.Trim().ToLowerInvariant() == "film" ? "film" : "comic";
+        // The form is no longer user-configurable. Every session starts as a robot;
+        // the configured transformation interval continues to switch forms automatically.
+        settings.StartForm = "robot";
         settings.MonitorTarget = settings.MonitorTarget?.Trim().ToLowerInvariant() switch
         {
             "all" => "all",

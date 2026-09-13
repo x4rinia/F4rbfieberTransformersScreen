@@ -238,6 +238,8 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="18" />
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="12" />
+                                <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
                             <StackPanel>
@@ -254,8 +256,11 @@
                                     <ComboBoxItem Content="Hound // Autobot" Tag="hound" />
                                     <ComboBoxItem Content="Optimus Prime // Autobot" Tag="optimus" />
                                     <ComboBoxItem Content="Bumblebee // Autobot" Tag="bumblebee" />
+                                    <ComboBoxItem Content="Ironhide // Autobot" Tag="ironhide" />
+                                    <ComboBoxItem Content="Jazz // Autobot" Tag="jazz" />
                                     <ComboBoxItem Content="Megatron // Decepticon" Tag="megatron" />
                                     <ComboBoxItem Content="Shockwave // Decepticon" Tag="shockwave" />
+                                    <ComboBoxItem Content="Soundwave // Decepticon" Tag="soundwave" />
                                 </ComboBox>
                             </StackPanel>
 
@@ -270,7 +275,7 @@
                             </StackPanel>
                             <StackPanel Grid.Row="2" Grid.Column="2">
                                 <TextBlock Style="{StaticResource FieldLabel}" Text="FORMWECHSEL" />
-                                <ComboBox x:Name="TransformationIntervalCombo" SelectionChanged="TransformationIntervalChanged">
+                                <ComboBox x:Name="TransformationIntervalCombo">
                                     <ComboBoxItem Content="Aus" Tag="0" />
                                     <ComboBoxItem Content="Alle 5 Sekunden" Tag="5" />
                                     <ComboBoxItem Content="Alle 10 Sekunden" Tag="10" />
@@ -278,16 +283,15 @@
                                     <ComboBoxItem Content="Alle 30 Sekunden" Tag="30" />
                                 </ComboBox>
                             </StackPanel>
-                            <StackPanel x:Name="StartFormPanel" Grid.Row="4">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="DAUERFORM (NUR BEI FORMWECHSEL AUS)" />
+                            <StackPanel Grid.Row="4" Grid.ColumnSpan="3">
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="STIL" />
                                 <StackPanel Orientation="Horizontal">
-                                    <RadioButton x:Name="RobotFormRadio" GroupName="StartForm" Content="Roboterform" IsChecked="True" Margin="0,0,22,0" />
-                                    <RadioButton x:Name="AltFormRadio" GroupName="StartForm" Content="Alt-Form" />
+                                    <RadioButton x:Name="ComicStyleRadio" GroupName="TransformerStyle" Content="Comic" IsChecked="True" Margin="0,0,22,0" />
+                                    <RadioButton x:Name="FilmStyleRadio" GroupName="TransformerStyle" Content="Film" />
                                 </StackPanel>
                             </StackPanel>
-                            <TextBlock Grid.Row="4" Grid.Column="2" VerticalAlignment="Center"
-                                       Foreground="#8BA9BA" FontSize="11" TextWrapping="Wrap"
-                                       Text="Bei Formwechsel „Aus“ bleibt die angehakte Form dauerhaft sichtbar. Mit einem Intervall wechseln Roboter- und Alt-Form automatisch." />
+                            <TextBlock Grid.Row="6" Grid.ColumnSpan="3" Foreground="#8BA9BA" FontSize="11" TextWrapping="Wrap"
+                                       Text="Comic und Film sind exklusiv auswählbar. Der automatische Wechsel zwischen Roboterform und Alt-Form funktioniert unabhängig davon weiter." />
                         </Grid>
 
                         <Border x:Name="ProfileCycleSelectionPanel" Margin="0,20,0,0" Padding="14"
@@ -296,28 +300,17 @@
                                 <TextBlock Style="{StaticResource FieldLabel}" Text="PROFILE IM AUTOMATISCHEN WECHSEL" />
                                 <TextBlock Margin="0,0,0,8" Foreground="#8BA9BA" FontSize="11" TextWrapping="Wrap"
                                            Text="Diese Auswahl betrifft nur den automatischen Profilwechsel. Standard-Transformer und Roboter-/Alt-Mode bleiben unabhängig." />
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition />
-                                        <ColumnDefinition />
-                                        <ColumnDefinition />
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel>
-                                        <TextBlock Foreground="#D0A247" FontSize="11" FontWeight="Bold" Text="DINOBOTS" />
-                                        <CheckBox x:Name="GrimlockCycleCheck" Content="Grimlock" Tag="grimlock" Click="ProfileSelectionChanged" />
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="1">
-                                        <TextBlock Foreground="#7CB7FF" FontSize="11" FontWeight="Bold" Text="AUTOBOTS" />
-                                        <CheckBox x:Name="HoundCycleCheck" Content="Hound" Tag="hound" Click="ProfileSelectionChanged" />
-                                        <CheckBox x:Name="OptimusCycleCheck" Content="Optimus Prime" Tag="optimus" Click="ProfileSelectionChanged" />
-                                        <CheckBox x:Name="BumblebeeCycleCheck" Content="Bumblebee" Tag="bumblebee" Click="ProfileSelectionChanged" />
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="2">
-                                        <TextBlock Foreground="#E785FF" FontSize="11" FontWeight="Bold" Text="DECEPTICONS" />
-                                        <CheckBox x:Name="MegatronCycleCheck" Content="Megatron" Tag="megatron" Click="ProfileSelectionChanged" />
-                                        <CheckBox x:Name="ShockwaveCycleCheck" Content="Shockwave" Tag="shockwave" Click="ProfileSelectionChanged" />
-                                    </StackPanel>
-                                </Grid>
+                                <StackPanel>
+                                    <CheckBox x:Name="GrimlockCycleCheck" Content="Grimlock" Tag="grimlock" Click="ProfileSelectionChanged" />
+                                    <CheckBox x:Name="HoundCycleCheck" Content="Hound" Tag="hound" Click="ProfileSelectionChanged" />
+                                    <CheckBox x:Name="OptimusCycleCheck" Content="Optimus Prime" Tag="optimus" Click="ProfileSelectionChanged" />
+                                    <CheckBox x:Name="BumblebeeCycleCheck" Content="Bumblebee" Tag="bumblebee" Click="ProfileSelectionChanged" />
+                                    <CheckBox x:Name="MegatronCycleCheck" Content="Megatron" Tag="megatron" Click="ProfileSelectionChanged" />
+                                    <CheckBox x:Name="ShockwaveCycleCheck" Content="Shockwave" Tag="shockwave" Click="ProfileSelectionChanged" />
+                                    <CheckBox x:Name="SoundwaveCycleCheck" Content="Soundwave" Tag="soundwave" Click="ProfileSelectionChanged" />
+                                    <CheckBox x:Name="IronhideCycleCheck" Content="Ironhide" Tag="ironhide" Click="ProfileSelectionChanged" />
+                                    <CheckBox x:Name="JazzCycleCheck" Content="Jazz" Tag="jazz" Click="ProfileSelectionChanged" />
+                                </StackPanel>
                                 <TextBlock x:Name="ProfileSelectionHint" Foreground="#8BE4FF" FontSize="11" TextWrapping="Wrap" />
                             </StackPanel>
                         </Border>
@@ -348,7 +341,7 @@
                         <CheckBox x:Name="RealDataCheck" Content="Echte Windows-/Hardware-Telemetrie verwenden" />
                         <TextBlock Margin="24,7,0,0" Foreground="#7F9FB1" FontSize="11" TextWrapping="Wrap"
                                    Text="CPU, GPU, RAM, Temperaturen, Netzwerk, Datenträger, Prozesse, Hostname und Uptime werden aus der bewährten Windows-Sensorbasis gelesen." />
-                        <TextBlock Style="{StaticResource FieldLabel}" Text="ZUFÄLLIGE CYBERTRON-ALERTS" Margin="0,15,0,5" />
+                        <TextBlock Style="{StaticResource FieldLabel}" Text="ZUFÄLLIGE ALERTS // ENERGON ODER DECEPTICONS ANGRIFF" Margin="0,15,0,5" />
                         <ComboBox x:Name="RandomEventsCombo">
                             <ComboBoxItem Content="Aus" Tag="off" />
                             <ComboBoxItem Content="Selten" Tag="rare" />

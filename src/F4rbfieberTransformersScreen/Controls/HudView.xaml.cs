@@ -116,7 +116,8 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
             var query = new List<string>
             {
                 $"profile={Uri.EscapeDataString(initialProfile)}",
-                $"form={Uri.EscapeDataString(_settings.StartForm)}"
+                $"form={Uri.EscapeDataString(_settings.StartForm)}",
+                $"style={Uri.EscapeDataString(_settings.TransformerStyle)}"
             };
             if (_isSecondary) query.Add("secondary=1");
             else if (isSingleMonitor) query.Add("singleMonitor=1");
@@ -223,6 +224,25 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
             var command = document.RootElement.TryGetProperty("command", out var value) ? value.GetString() : null;
             if (command == "openSettings" && !_previewMode)
                 SettingsRequested?.Invoke(this, EventArgs.Empty);
+            else if (command == "setTransformerStyle" && document.RootElement.TryGetProperty("value", out var styleValue))
+            {
+                var style = styleValue.GetString();
+                if (style is "comic" or "film" && _settingsService is not null)
+                {
+                    _settings.TransformerStyle = style;
+                    _settingsService.Save(_settings);
+                }
+            }
+            else if (command == "setTransformerProfile" && document.RootElement.TryGetProperty("value", out var profileValue))
+            {
+                var profile = profileValue.GetString();
+                if (profile is "grimlock" or "hound" or "optimus" or "bumblebee" or "ironhide" or "jazz"
+                    or "megatron" or "shockwave" or "soundwave" && _settingsService is not null)
+                {
+                    _settings.TransformerProfile = profile;
+                    _settingsService.Save(_settings);
+                }
+            }
             else if (command == "exit")
                 ExitRequested?.Invoke(this, EventArgs.Empty);
         }

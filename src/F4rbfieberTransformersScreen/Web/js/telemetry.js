@@ -26,11 +26,12 @@ let settings = {
   targetFps: 60,
   animationQuality: 'High',
   transformerProfile: startupParameters.get('profile') || 'optimus',
+  transformerStyle: startupParameters.get('style') === 'film' ? 'film' : 'comic',
   transformationIntervalSeconds: 15,
   startForm: startupParameters.get('form') === 'alt' ? 'alt' : 'robot',
   profileMode: 'fixed',
   profileCycleIntervalSeconds: 60,
-  selectedTransformerProfiles: ['grimlock', 'hound', 'optimus', 'bumblebee', 'megatron', 'shockwave'],
+  selectedTransformerProfiles: ['grimlock', 'hound', 'optimus', 'bumblebee', 'ironhide', 'jazz', 'megatron', 'shockwave', 'soundwave'],
   monitorTarget: '1',
   enableEvents: true
 };

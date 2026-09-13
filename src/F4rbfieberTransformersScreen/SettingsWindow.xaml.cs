@@ -10,7 +10,8 @@ public partial class SettingsWindow : Window
     private readonly SettingsService _settingsService;
 
     private System.Windows.Controls.CheckBox[] ProfileCycleChecks =>
-        [GrimlockCycleCheck, HoundCycleCheck, OptimusCycleCheck, BumblebeeCycleCheck, MegatronCycleCheck, ShockwaveCycleCheck];
+        [GrimlockCycleCheck, HoundCycleCheck, OptimusCycleCheck, BumblebeeCycleCheck, MegatronCycleCheck,
+         ShockwaveCycleCheck, SoundwaveCycleCheck, IronhideCycleCheck, JazzCycleCheck];
 
     public SettingsWindow(SettingsService settingsService)
     {
@@ -30,9 +31,9 @@ public partial class SettingsWindow : Window
         Select(QualityCombo, settings.AnimationQuality, useTag: false);
         Select(ProfileModeCombo, settings.ProfileMode, useTag: true);
         Select(TransformerCombo, settings.TransformerProfile, useTag: true);
+        ComicStyleRadio.IsChecked = settings.TransformerStyle != "film";
+        FilmStyleRadio.IsChecked = settings.TransformerStyle == "film";
         Select(TransformationIntervalCombo, settings.TransformationIntervalSeconds.ToString(), useTag: true);
-        RobotFormRadio.IsChecked = settings.StartForm != "alt";
-        AltFormRadio.IsChecked = settings.StartForm == "alt";
         Select(ProfileCycleIntervalCombo, settings.ProfileCycleIntervalSeconds.ToString(), useTag: true);
         Select(RandomEventsCombo, settings.RandomEvents, useTag: true);
         EnergySavingCheck.IsChecked = settings.EnergySavingMode;
@@ -42,7 +43,6 @@ public partial class SettingsWindow : Window
         EnsureProfileSelection();
         UpdateProfileSelectionHint();
         UpdateProfileModeState();
-        UpdateStartFormState();
     }
 
     private void SaveClick(object sender, RoutedEventArgs e)
@@ -59,9 +59,10 @@ public partial class SettingsWindow : Window
             AnimationQuality = Selected(QualityCombo, false),
             ProfileMode = Selected(ProfileModeCombo, true),
             TransformerProfile = Selected(TransformerCombo, true),
+            TransformerStyle = FilmStyleRadio.IsChecked == true ? "film" : "comic",
             SelectedTransformerProfiles = SelectedCycleProfiles(),
             TransformationIntervalSeconds = int.TryParse(Selected(TransformationIntervalCombo, true), out var interval) ? interval : 15,
-            StartForm = AltFormRadio.IsChecked == true ? "alt" : "robot",
+            StartForm = "robot",
             ProfileCycleIntervalSeconds = int.TryParse(Selected(ProfileCycleIntervalCombo, true), out var profileInterval) ? profileInterval : 60,
             RandomEvents = Selected(RandomEventsCombo, true),
             EnergySavingMode = EnergySavingCheck.IsChecked == true
@@ -77,8 +78,6 @@ public partial class SettingsWindow : Window
     }
 
     private void ProfileModeChanged(object sender, SelectionChangedEventArgs e) => UpdateProfileModeState();
-
-    private void TransformationIntervalChanged(object sender, SelectionChangedEventArgs e) => UpdateStartFormState();
 
     private void ProfileSelectionChanged(object sender, RoutedEventArgs e)
     {
@@ -123,14 +122,6 @@ public partial class SettingsWindow : Window
         ProfileCycleIntervalCombo.IsEnabled = cycleEnabled;
         ProfileCycleSelectionPanel.IsEnabled = cycleEnabled;
         ProfileCycleSelectionPanel.Opacity = cycleEnabled ? 1 : 0.42;
-    }
-
-    private void UpdateStartFormState()
-    {
-        if (TransformationIntervalCombo is null || StartFormPanel is null) return;
-        var fixedFormEnabled = Selected(TransformationIntervalCombo, true) == "0";
-        StartFormPanel.IsEnabled = fixedFormEnabled;
-        StartFormPanel.Opacity = fixedFormEnabled ? 1 : 0.42;
     }
 
     private static void Select(System.Windows.Controls.ComboBox combo, string value, bool useTag)

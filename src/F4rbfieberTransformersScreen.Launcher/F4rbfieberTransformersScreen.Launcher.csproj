@@ -7,9 +7,9 @@
     <AssemblyName>Transformers</AssemblyName>
     <Product>Transformers</Product>
     <AssemblyTitle>Transformers</AssemblyTitle>
-    <Version>2.0.0</Version>
-    <FileVersion>2.0.0.0</FileVersion>
-    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <Version>2.1.0</Version>
+    <FileVersion>2.1.0.0</FileVersion>
+    <AssemblyVersion>2.1.0.0</AssemblyVersion>
     <RootNamespace>F4rbfieberTransformersScreen.Launcher</RootNamespace>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>true</SelfContained>

@@ -235,16 +235,21 @@ $requiredFiles = @(
     (Join-Path $screensaverPayload 'Web\index.html'),
     (Join-Path $screensaverPayload 'Web\assets\cybertron-command-deck.jpg'),
     (Join-Path $screensaverPayload 'Web\assets\dinobot-emblem.png'),
-    (Join-Path $screensaverPayload 'Web\assets\optimus-robot.png'),
-    (Join-Path $screensaverPayload 'Web\assets\bumblebee-car.png'),
-    (Join-Path $screensaverPayload 'Web\assets\grimlock-trex.png'),
-    (Join-Path $screensaverPayload 'Web\assets\hound-robot.png'),
-    (Join-Path $screensaverPayload 'Web\assets\hound-truck.png'),
-    (Join-Path $screensaverPayload 'Web\assets\megatron-tank.png'),
-    (Join-Path $screensaverPayload 'Web\assets\shockwave-robot.png'),
-    (Join-Path $screensaverPayload 'Web\assets\shockwave-tank.png'),
+    (Join-Path $screensaverPayload 'Web\assets\autobot-emblem.png'),
+    (Join-Path $screensaverPayload 'Web\assets\decepticon-emblem.png'),
+    (Join-Path $screensaverPayload 'Web\assets\fonts\transformers-movie.ttf'),
+    (Join-Path $screensaverPayload 'Web\assets\fonts\optimus.ttf'),
+    (Join-Path $screensaverPayload 'Web\assets\fonts\optimus-bold.ttf'),
+    (Join-Path $screensaverPayload 'Web\assets\fonts\ancient-autobot.ttf'),
     (Join-Path $screensaverPayload 'Web\js\profiles.js')
 )
+$profileIds = @('grimlock', 'hound', 'optimus', 'bumblebee', 'ironhide', 'jazz', 'megatron', 'shockwave', 'soundwave')
+$profileAssetNames = @('comic-robot.png', 'comic-alt.png', 'film-robot.png', 'film-alt.png')
+foreach ($profileId in $profileIds) {
+    foreach ($assetName in $profileAssetNames) {
+        $requiredFiles += Join-Path $screensaverPayload "Web\assets\transformers\$profileId\$assetName"
+    }
+}
 foreach ($requiredFile in $requiredFiles) {
     if (-not (Test-Path -LiteralPath $requiredFile)) {
         throw "Release file missing: $requiredFile"

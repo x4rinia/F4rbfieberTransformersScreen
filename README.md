@@ -8,13 +8,12 @@ A standalone Windows screensaver in a Cybertron / Transformers style. The Transf
 
 - Real telemetry for CPU, CPU Cores, GPU, Temperatures, VRAM, RAM, Network, Disks, and active processes
 - Hostname (Custom Name), Windows Version, Date, Time, and System Uptime
-- Six data-driven profiles with clearly separated color palettes and correct faction logos:
-  - Grimlock — Dinobot — Robot / T-Rex — Antique Gold, Brass, and Gunmetal
-  - Hound — Autobot — Robot / Military Truck — Olive, Khaki, and Bronze
-  - Optimus Prime — Autobot — Robot / Truck
-  - Bumblebee — Autobot — Robot / Sports Car
-  - Megatron — Decepticon — Robot / Cybertron Tank
-  - Shockwave — Decepticon — Robot / Cybertron Hover Tank
+- Nine data-driven profiles with individual, readable HUD palettes and correct faction logos:
+  - Grimlock, Hound, Optimus Prime, Bumblebee, Ironhide, Jazz, Megatron, Shockwave, and Soundwave
+- A global Comic / Film selector loads one dedicated robot or Alt-Mode PNG per Transformer and style
+- The selected Comic / Film style is persisted in the Windows settings and can also be switched directly in the HUD
+- Transformer Movie and Optimus fonts are bundled for display headings and decorative labels; telemetry values keep readable system fonts
+- Exactly two random alert types: Energon Alert and Decepticons Angriff
 - Grimlock displays the Dinobot emblem, Autobots display the Autobot emblem, and Decepticons display the Decepticon emblem
 - Smooth automatic transitions between Robot and Alt-Mode
 - Choose a fixed Transformer or loop through individually enabled profiles
@@ -33,7 +32,7 @@ A standalone Windows screensaver in a Cybertron / Transformers style. The Transf
 - `src/F4rbfieberTransformersScreen/Web/js/profiles.js` — Central profiles and color schemes
 - `build-release.ps1` — Reproducible release / installer build
 
-New Transformers can be added exclusively as another profile in `profiles.js`, as a selection in the configuration window, and with two image assets.
+New Transformers can be added as another profile in `profiles.js`, as a selection in the configuration window, and with four transparent PNG assets: Comic Robot, Comic Alt-Mode, Film Robot, and Film Alt-Mode.
 
 ## Running and Building
 
@@ -49,4 +48,4 @@ The release build generates `release\Transformers_SCR`, `Install-Screensaver.bat
 
 ## Image Sources
 
-The Cybertron environment, holograms, and emblems were specifically generated for this standalone project. The UI, values, and control elements are code-native and not a static screenshot interface.
+The Transformer profile sheets and fonts are supplied project assets. The UI, values, and control elements are code-native and not a static screenshot interface.

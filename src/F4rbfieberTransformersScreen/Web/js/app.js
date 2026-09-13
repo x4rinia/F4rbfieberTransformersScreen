@@ -1,5 +1,5 @@
 import { subscribe, subscribeSettings, getSettings, format, isNativeTelemetry } from './telemetry.js';
-import { PROFILES, getProfile, getEnabledProfileIds } from './profiles.js';
+import { PROFILES, getProfile, getProfileAppearance, getProfileAsset, getEnabledProfileIds, normalizeVisualStyle } from './profiles.js';
 
 const $ = selector => document.querySelector(selector);
 const app = $('#app');
@@ -12,6 +12,7 @@ const history = {
 };
 let activeProfile = PROFILES.optimus;
 let activeForm = 'robot';
+let activeVisualStyle = 'comic';
 let lastSample = 0;
 let nextFormSwitch = Number.POSITIVE_INFINITY;
 let nextProfileSwitch = Number.POSITIVE_INFINITY;
@@ -19,6 +20,11 @@ let lastLog = 0;
 let profileTransitionToken = 0;
 let randomEventTimer = 0;
 let isEventActive = false;
+let alertCloseTimer = 0;
+let alertProgressAnimation = null;
+let alertAnimationToken = 0;
+const ALERT_PROGRESS_DURATION_MS = 3200;
+const ALERT_COMPLETE_HOLD_MS = 180;
 
 for (const profile of Object.values(PROFILES)) {
   const option = document.createElement('option');
@@ -61,7 +67,7 @@ function commitProfile(profile, targetForm = activeForm) {
   profileSelect.value = activeProfile.id;
   $('#hologramTitle').textContent = activeProfile.name;
   $('#profileFaction').textContent = `${activeProfile.faction} // HOLOGRAMM`;
-  $('#altModeLabel').textContent = activeProfile.altLabel;
+  $('#altModeLabel').textContent = getProfileAppearance(activeProfile, activeVisualStyle).altLabel;
   setFactionLogo($('#headerFactionLogo'), activeProfile.factionLogo);
   setFactionLogo($('#factionWatermark'), activeProfile.factionLogo);
   setForm(targetForm === 'alt' ? 'alt' : 'robot', false);
@@ -93,10 +99,25 @@ function setFactionLogo(image, source) {
 }
 
 function applyPalette() {
-  app.style.setProperty('--primary', activeProfile.primary);
-  app.style.setProperty('--secondary', activeProfile.secondary);
-  app.style.setProperty('--accent', activeProfile.accent);
-  app.style.setProperty('--ink', activeProfile.ink);
+  const appearance = getProfileAppearance(activeProfile, activeVisualStyle);
+  app.style.setProperty('--primary', appearance.primary);
+  app.style.setProperty('--secondary', appearance.secondary);
+  app.style.setProperty('--accent', appearance.accent);
+  app.style.setProperty('--ink', appearance.ink);
+}
+
+function setVisualStyle(style, animate = true, persist = false) {
+  activeVisualStyle = normalizeVisualStyle(style);
+  app.dataset.visualStyle = activeVisualStyle;
+  $('#comicStyle').classList.toggle('active', activeVisualStyle === 'comic');
+  $('#filmStyle').classList.toggle('active', activeVisualStyle === 'film');
+  $('#altModeLabel').textContent = getProfileAppearance(activeProfile, activeVisualStyle).altLabel;
+  applyPalette();
+  setForm(activeForm, animate);
+  if (persist) {
+    window.chrome?.webview?.postMessage({ command: 'setTransformerStyle', value: activeVisualStyle });
+    showOverlay(`${activeVisualStyle === 'comic' ? 'COMIC' : 'FILM'} // ASSET-MATRIX AKTIV`);
+  }
 }
 
 function setForm(form, animate = true) {
@@ -109,16 +130,25 @@ function setForm(form, animate = true) {
     void frame.offsetWidth;
     frame.classList.add('transforming');
   }
-  const source = activeForm === 'robot' ? activeProfile.robotImage : activeProfile.altImage;
+  const source = getProfileAsset(activeProfile, activeVisualStyle, activeForm);
   image.src = source;
-  image.alt = activeForm === 'robot' ? `${activeProfile.name} als Roboter` : `${activeProfile.name} im Alt-Mode ${activeProfile.altLabel}`;
+  const styleLabel = activeVisualStyle === 'comic' ? 'Comic' : 'Film';
+  const altLabel = getProfileAppearance(activeProfile, activeVisualStyle).altLabel;
+  image.alt = activeForm === 'robot'
+    ? `${activeProfile.name} als ${styleLabel}-Roboter`
+    : `${activeProfile.name} im ${styleLabel}-Alt-Mode ${altLabel}`;
   echo.src = source;
   app.dataset.form = activeForm;
   $('#robotMode').classList.toggle('active', activeForm === 'robot');
   $('#altMode').classList.toggle('active', activeForm === 'alt');
 }
 
-profileSelect.addEventListener('change', () => setProfile(profileSelect.value));
+profileSelect.addEventListener('change', () => {
+  setProfile(profileSelect.value);
+  window.chrome?.webview?.postMessage({ command: 'setTransformerProfile', value: profileSelect.value });
+});
+$('#comicStyle').addEventListener('click', () => setVisualStyle('comic', true, true));
+$('#filmStyle').addEventListener('click', () => setVisualStyle('film', true, true));
 $('#robotMode').addEventListener('click', () => { setForm('robot'); scheduleFormSwitch(); });
 $('#altMode').addEventListener('click', () => { setForm('alt'); scheduleFormSwitch(); });
 
@@ -239,6 +269,7 @@ subscribeSettings(settings => {
   const initialProfile = settings.profileMode === 'cycle' && !enabledProfileIds.includes(configuredProfile)
     ? enabledProfileIds[0]
     : configuredProfile;
+  setVisualStyle(settings.transformerStyle, false);
   setProfile(initialProfile, false, settings.startForm);
 });
 
@@ -294,39 +325,65 @@ function triggerRandomEvent(manual = false) {
   if (!manual && frequency === 'off') return;
 
   isEventActive = true;
-  const eventType = Math.floor(Math.random() * 3);
-  
+  const eventType = Math.floor(Math.random() * 2);
+
   if (eventType === 0) {
-    const glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
-    let text = '';
-    for (let i = 0; i < 16; i++) text += glyphs.charAt(Math.floor(Math.random() * glyphs.length));
-    showCyberAlert('INCOMING TRANSMISSION', 'UNKNOWN SIGNAL DETECTED', text, 72, 'transmission');
-  } else if (eventType === 1) {
-    const frame = $('#hologramFrame');
-    frame.classList.add('energon-glitch');
-    showCyberAlert('CYBERTRON SIGNAL ALERT', 'MATRIX INTERFERENCE', 'HOLOGRAM STABILITY COMPROMISED', 43, 'warning', () => frame.classList.remove('energon-glitch'));
-  } else {
     const level = 78 + Math.floor(Math.random() * 22);
-    showCyberAlert('ENERGON ENERGY ALERT', 'ENERGY SURGE DETECTED', `ENERGON CORE OUTPUT // ${level}%`, level, 'energon');
+    showCyberAlert('ENERGON ALERT', 'ENERGON-SCHUB ERKANNT', `ENERGON-KERNLEISTUNG // ${level}%`, 'energon');
+  } else {
+    const level = 72 + Math.floor(Math.random() * 28);
+    app.classList.add('under-attack');
+    showCyberAlert(
+      'DECEPTICONS ANGRIFF',
+      'FEINDKONTAKT ERFASST',
+      `VERTEIDIGUNGSMATRIX // BEDROHUNGSSTUFE ${level}%`,
+      'attack',
+      () => app.classList.remove('under-attack')
+    );
   }
 }
 
-function showCyberAlert(code, title, detail, level, tone, onClose) {
+function showCyberAlert(code, title, detail, tone, onClose) {
   const alert = $('#cyberAlert');
+  const meter = $('#alertMeter');
+  const animationToken = ++alertAnimationToken;
+  clearTimeout(alertCloseTimer);
+  alertProgressAnimation?.cancel();
   $('#alertCode').textContent = code;
   $('#alertTitle').textContent = title;
   $('#alertDetail').textContent = detail;
-  $('#alertMeter').style.width = `${Math.max(5, Math.min(100, level))}%`;
+  meter.style.width = '0%';
   alert.dataset.tone = tone;
   alert.classList.add('visible');
   alert.setAttribute('aria-hidden', 'false');
-  setTimeout(() => {
-    alert.classList.remove('visible');
-    alert.setAttribute('aria-hidden', 'true');
-    onClose?.();
-    isEventActive = false;
-    scheduleRandomEvent();
-  }, 3200);
+
+  const closeAfterCompletion = () => {
+    if (animationToken !== alertAnimationToken) return;
+    meter.style.width = '100%';
+    alertProgressAnimation?.cancel();
+    alertProgressAnimation = null;
+    alertCloseTimer = window.setTimeout(() => {
+      if (animationToken !== alertAnimationToken) return;
+      alert.classList.remove('visible');
+      alert.setAttribute('aria-hidden', 'true');
+      meter.style.width = '0%';
+      onClose?.();
+      isEventActive = false;
+      scheduleRandomEvent();
+    }, ALERT_COMPLETE_HOLD_MS);
+  };
+
+  if (typeof meter.animate === 'function') {
+    alertProgressAnimation = meter.animate(
+      [{ width: '0%' }, { width: '100%' }],
+      { duration: ALERT_PROGRESS_DURATION_MS, easing: 'linear', fill: 'forwards' }
+    );
+    alertProgressAnimation.finished.then(closeAfterCompletion).catch(() => {});
+  } else {
+    meter.style.transition = `width ${ALERT_PROGRESS_DURATION_MS}ms linear`;
+    requestAnimationFrame(() => requestAnimationFrame(() => { meter.style.width = '100%'; }));
+    alertCloseTimer = window.setTimeout(closeAfterCompletion, ALERT_PROGRESS_DURATION_MS);
+  }
 }
 
 function scheduleRandomEvent() {
@@ -346,9 +403,9 @@ function updateCoordinates() {
   const lat = (Math.random() * 180 - 90).toFixed(4);
   const lon = (Math.random() * 360 - 180).toFixed(4);
   coordEl.querySelector('b').textContent = `${lat}° N   ${lon}° E`;
-  const yPos = Math.random() > 0.5 ? '10%' : '80%';
-  coordEl.style.top = yPos;
-  coordEl.style.bottom = 'auto';
+  coordEl.classList.toggle('left', Math.random() > 0.5);
+  coordEl.style.top = 'auto';
+  coordEl.style.bottom = '10%';
   coordEl.classList.add('visible');
   
   setTimeout(() => {

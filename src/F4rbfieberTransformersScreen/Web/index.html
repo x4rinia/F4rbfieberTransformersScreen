@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <main id="app" class="app" data-profile="optimus" data-form="robot">
+  <main id="app" class="app" data-profile="optimus" data-form="robot" data-visual-style="comic">
     <div class="world" aria-hidden="true"></div>
     <div class="world-shade" aria-hidden="true"></div>
     <div class="circuit-field" aria-hidden="true"></div>
@@ -22,6 +22,13 @@
       </div>
       <div class="machine-id">
         <span id="hostName">LOCAL NODE</span><i>//</i><span id="windowsVersion">WINDOWS</span>
+      </div>
+      <div class="version-switch" role="group" aria-label="Transformer-Version">
+        <span>ASSET-STIL</span>
+        <div>
+          <button id="comicStyle" class="active" type="button">COMIC</button>
+          <button id="filmStyle" type="button">FILM</button>
+        </div>
       </div>
       <label class="profile-select" for="profileSelect">
         <span>HOLOGRAMM-PROFIL</span>
