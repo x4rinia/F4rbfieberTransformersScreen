@@ -5,8 +5,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>Transformers</AssemblyName>
-    <Product>Transformers</Product>
-    <AssemblyTitle>Transformers</AssemblyTitle>
+    <Product>Transformers Screensaver</Product>
+    <AssemblyTitle>Transformers Screensaver</AssemblyTitle>
     <Version>2.1.0</Version>
     <FileVersion>2.1.0.0</FileVersion>
     <AssemblyVersion>2.1.0.0</AssemblyVersion>
