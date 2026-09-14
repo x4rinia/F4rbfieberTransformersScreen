@@ -24,12 +24,14 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
     private readonly DispatcherTimer _timer;
     private TelemetryService? _telemetry;
     private Task<TelemetryService>? _telemetryInitialization;
+    private Task<SystemTelemetry>? _initialTelemetryRead;
     private SettingsService? _settingsService;
     private AppSettings _settings = new();
     private bool _previewMode;
     private bool _ready;
     private bool _disposed;
     private bool _ownsTelemetry;
+    private int _telemetryReadInProgress;
 
     public event EventHandler? SettingsRequested;
     public event EventHandler? ExitRequested;
@@ -72,6 +74,7 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
         _previewMode = previewMode;
         _settings = settingsService.Load();
         _timer.Interval = _settings.EnergySavingMode ? TimeSpan.FromMilliseconds(2000) : TimeSpan.FromMilliseconds(750);
+        StartTelemetryInitialization();
     }
 
     public void Disable()
@@ -161,38 +164,8 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
             : settings.SelectedTransformerProfiles[0];
     }
 
-    private async Task CompleteTelemetryInitializationAsync(Task<TelemetryService> initialization)
+    private void StartTelemetryInitialization()
     {
-        try
-        {
-            var telemetry = await initialization;
-            if (_disposed)
-            {
-                if (_ownsTelemetry) telemetry.Dispose();
-                return;
-            }
-            _telemetry = telemetry;
-            SendTelemetry(this, EventArgs.Empty);
-        }
-        catch
-        {
-            // The built-in animated fallback stays active when sensors are unavailable.
-        }
-    }
-
-    private void OnNavigationCompleted(object? sender, CoreWebView2NavigationCompletedEventArgs e)
-    {
-        if (!e.IsSuccess) return;
-        _ready = true;
-        SendEnvelope("settings", _settings);
-        _timer.Start();
-        _ = StartTelemetryAfterFirstPaintAsync();
-    }
-
-    private async Task StartTelemetryAfterFirstPaintAsync()
-    {
-        // WebView gets the first render window before comparatively expensive sensor discovery.
-        await Task.Delay(_previewMode ? 1500 : 1200);
         if (_disposed || _telemetryInitialization is not null) return;
         if (_settings.ShowRealData)
         {
@@ -203,16 +176,54 @@ public partial class HudView : System.Windows.Controls.UserControl, IDisposable
         else
         {
             _ownsTelemetry = true;
-            _telemetryInitialization = Task.FromResult(new TelemetryService(initializeHardware: false));
+            _telemetryInitialization = Task.Run(() => new TelemetryService(initializeHardware: false));
         }
-        await CompleteTelemetryInitializationAsync(_telemetryInitialization);
+        _initialTelemetryRead = ReadInitialTelemetryAsync(_telemetryInitialization, _settings);
     }
 
-    private void SendTelemetry(object? sender, EventArgs e)
+    private static Task<SystemTelemetry> ReadInitialTelemetryAsync(
+        Task<TelemetryService> initialization,
+        AppSettings settings) =>
+        Task.Run(async () =>
+        {
+            var telemetry = await initialization.ConfigureAwait(false);
+            return telemetry.Read(settings);
+        });
+
+    private async void OnNavigationCompleted(object? sender, CoreWebView2NavigationCompletedEventArgs e)
     {
-        if (!_ready || _telemetry is null || _disposed) return;
-        try { SendEnvelope("telemetry", _telemetry.Read(_settings)); }
+        if (!e.IsSuccess) return;
+        _ready = true;
+        SendEnvelope("settings", _settings);
+        StartTelemetryInitialization();
+        try
+        {
+            var telemetry = await _telemetryInitialization!;
+            var initialPayload = await _initialTelemetryRead!;
+            if (_disposed) return;
+            _telemetry = telemetry;
+            SendEnvelope("telemetry", initialPayload);
+            _timer.Start();
+        }
+        catch
+        {
+            // The built-in animated fallback stays active when sensors are unavailable.
+        }
+    }
+
+    private async void SendTelemetry(object? sender, EventArgs e)
+    {
+        var telemetry = _telemetry;
+        if (!_ready || telemetry is null || _disposed || Interlocked.Exchange(ref _telemetryReadInProgress, 1) != 0) return;
+        try
+        {
+            var settings = _settings;
+            var payload = await Task.Run(() => telemetry.Read(settings));
+            if (!_disposed && _ready && ReferenceEquals(telemetry, _telemetry))
+                SendEnvelope("telemetry", payload);
+        }
         catch { /* A failed sensor sample must never stop the renderer. */ }
+        finally { Interlocked.Exchange(ref _telemetryReadInProgress, 0); }
     }
 
     private void SendEnvelope<T>(string type, T payload)

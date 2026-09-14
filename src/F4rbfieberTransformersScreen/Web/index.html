@@ -76,6 +76,7 @@
         <div class="target-ring ring-a" aria-hidden="true"></div>
         <div class="target-ring ring-b" aria-hidden="true"></div>
       </div>
+      <div id="profileRole" class="profile-role" aria-live="polite">AUTOBOT LEADER</div>
       <div class="projection-base" aria-hidden="true"><i></i><i></i><i></i></div>
       <div class="form-switch" role="group" aria-label="Transformationsform">
         <button id="robotMode" class="active" type="button" data-form="robot"><span>01</span>ROBOTERFORM</button>
@@ -90,7 +91,9 @@
       <div class="chronometer">
         <time id="clock">--:--:--</time>
         <span id="date">DATUM WIRD SYNCHRONISIERT</span>
-        <div><small>UPTIME</small><b id="uptime">00:00:00</b></div>
+        <div id="uptimeDisplay" class="uptime-display" data-font-state="ancient">
+          <span id="uptimeLabel">UPTIME</span><span id="uptime">00:00:00</span>
+        </div>
       </div>
 
       <article class="ops-block network-block">

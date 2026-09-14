@@ -23,10 +23,16 @@ let alertCloseTimer = 0;
 let alertProgressAnimation = null;
 let alertAnimationToken = 0;
 let alertDecodeTimers = [];
+let uptimeEasterEggTimer = 0;
+let uptimeReadableTimer = 0;
 const ALERT_PROGRESS_DURATION_MS = 4200;
 const ALERT_ENCRYPTED_HOLD_MS = 450;
 const ALERT_DECODE_DURATION_MS = 760;
 const ALERT_COMPLETE_HOLD_MS = 500;
+const UPTIME_EASTER_EGG_MIN_DELAY_MS = 8 * 60 * 1000;
+const UPTIME_EASTER_EGG_MAX_DELAY_MS = 20 * 60 * 1000;
+const UPTIME_READABLE_MIN_DURATION_MS = 2000;
+const UPTIME_READABLE_MAX_DURATION_MS = 3000;
 const DECODE_GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#?/<>'.split('');
 
 for (const profile of Object.values(PROFILES)) {
@@ -69,6 +75,7 @@ function commitProfile(profile, targetForm = activeForm) {
   profileSelect.value = activeProfile.id;
   $('#hologramTitle').textContent = activeProfile.name;
   $('#profileFaction').textContent = `${activeProfile.faction} // HOLOGRAMM`;
+  $('#profileRole').textContent = activeProfile.role;
   $('#altModeLabel').textContent = getProfileAppearance(activeProfile).altLabel;
   setFactionLogo($('#headerFactionLogo'), activeProfile.factionLogo);
   setFactionLogo($('#factionWatermark'), activeProfile.factionLogo);
@@ -311,14 +318,14 @@ function triggerRandomEvent(manual = false) {
 
   if (eventType === 0) {
     const level = 78 + Math.floor(Math.random() * 22);
-    showCyberAlert('ENERGON ALERT', 'ENERGON-SCHUB ERKANNT', `ENERGON-KERNLEISTUNG // ${level}%`, 'energon');
+    showCyberAlert('ENERGON ALERT', 'ENERGON SURGE DETECTED', `ENERGON CORE OUTPUT // ${level}%`, 'energon');
   } else {
     const level = 72 + Math.floor(Math.random() * 28);
     app.classList.add('under-attack');
     showCyberAlert(
-      'DECEPTICONS ANGRIFF',
-      'FEINDKONTAKT ERFASST',
-      `VERTEIDIGUNGSMATRIX // BEDROHUNGSSTUFE ${level}%`,
+      'DECEPTICON ATTACK',
+      'HOSTILE CONTACT DETECTED',
+      `DEFENSE MATRIX // THREAT LEVEL ${level}%`,
       'attack',
       () => app.classList.remove('under-attack')
     );
@@ -430,6 +437,28 @@ function scheduleRandomEvent() {
   randomEventTimer = setTimeout(triggerRandomEvent, delay);
 }
 
+function randomBetween(minimum, maximum) {
+  return minimum + Math.random() * (maximum - minimum);
+}
+
+function scheduleUptimeEasterEgg() {
+  clearTimeout(uptimeEasterEggTimer);
+  const delay = randomBetween(UPTIME_EASTER_EGG_MIN_DELAY_MS, UPTIME_EASTER_EGG_MAX_DELAY_MS);
+  uptimeEasterEggTimer = window.setTimeout(() => {
+    const uptimeDisplay = $('#uptimeDisplay');
+    uptimeDisplay.classList.add('is-readable');
+    uptimeDisplay.dataset.fontState = 'readable';
+
+    clearTimeout(uptimeReadableTimer);
+    const readableDuration = randomBetween(UPTIME_READABLE_MIN_DURATION_MS, UPTIME_READABLE_MAX_DURATION_MS);
+    uptimeReadableTimer = window.setTimeout(() => {
+      uptimeDisplay.classList.remove('is-readable');
+      uptimeDisplay.dataset.fontState = 'ancient';
+      scheduleUptimeEasterEgg();
+    }, readableDuration);
+  }, delay);
+}
+
 function updateCoordinates() {
   const coordEl = $('.coordinates');
   const lat = (Math.random() * 180 - 90).toFixed(4);
@@ -447,6 +476,7 @@ function updateCoordinates() {
 
 setInterval(updateCoordinates, 8000);
 updateCoordinates();
+scheduleUptimeEasterEgg();
 
 subscribeSettings(settings => {
   const alertButton = $('#settingsButton');
