@@ -14,6 +14,7 @@ public sealed class GpuService
                    gpu.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Load)?.Value;
         var temperature = Find(gpu, SensorType.Temperature, "GPU Core") ??
                           gpu.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Temperature)?.Value;
+        if (!IsValidTemperature(temperature)) temperature = null;
         var usedMb = Find(gpu, SensorType.SmallData, "GPU Memory Used");
         var totalMb = Find(gpu, SensorType.SmallData, "GPU Memory Total");
 
@@ -37,4 +38,7 @@ public sealed class GpuService
         hardware.Sensors.FirstOrDefault(s => s.SensorType == type && s.Name.Contains(name, StringComparison.OrdinalIgnoreCase))?.Value;
 
     private static double? Round(float? value) => value.HasValue ? Math.Round(value.Value, 1) : null;
+
+    private static bool IsValidTemperature(float? value) =>
+        value.HasValue && float.IsFinite(value.Value) && value.Value is > 5f and < 130f;
 }

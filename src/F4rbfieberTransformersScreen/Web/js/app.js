@@ -1,4 +1,4 @@
-import { subscribe, subscribeSettings, getSettings, format, isNativeTelemetry } from './telemetry.js';
+import { subscribe, subscribeSettings, getSettings, format, isNativeTelemetry, isNativeHost } from './telemetry.js';
 import { PROFILES, getProfile, getProfileAppearance, getProfileAsset, getEnabledProfileIds } from './profiles.js';
 
 const $ = selector => document.querySelector(selector);
@@ -210,6 +210,15 @@ function renderProcesses(processes) {
   $('#processCount').textContent = String(processes?.length || 0);
 }
 
+function renderTemperature(selector, value) {
+  const output = $(selector);
+  const numericValue = Number(value);
+  const available = (!isNativeHost() || isNativeTelemetry()) &&
+    value != null && Number.isFinite(numericValue) && numericValue > 5 && numericValue < 130;
+  output.closest('.temperature-reading').hidden = !available;
+  output.textContent = available ? format(numericValue, 0, '°C') : '';
+}
+
 function renderTelemetry(data, now) {
   const stamp = data.timestamp ? new Date(data.timestamp) : new Date();
   $('#clock').textContent = stamp.toLocaleTimeString('de-DE', { hour12: false });
@@ -219,10 +228,10 @@ function renderTelemetry(data, now) {
   $('#uptime').textContent = data.uptime || '00:00:00';
   $('#cpuName').textContent = data.cpu.name || 'PROCESSOR ARRAY';
   $('#cpuValue').textContent = format(data.cpu.usage, 0, '%');
-  $('#cpuTemp').textContent = format(data.cpu.temperature, 0, '°C');
+  renderTemperature('#cpuTemp', data.cpu.temperature);
   $('#gpuName').textContent = data.gpu.name || 'GRAPHICS ARRAY';
   $('#gpuValue').textContent = format(data.gpu.usage, 0, '%');
-  $('#gpuTemp').textContent = format(data.gpu.temperature, 0, '°C');
+  renderTemperature('#gpuTemp', data.gpu.temperature);
   $('#vramValue').textContent = data.gpu.vramUsed == null || data.gpu.vramTotal == null ? 'N/A' : `${format(data.gpu.vramUsed, 1)} / ${format(data.gpu.vramTotal, 1)} GB`;
   $('#ramValue').textContent = format(data.ram.usage, 0, '%');
   $('#ramDetail').textContent = `${format(data.ram.used, 1)} / ${format(data.ram.total, 1)} GB`;

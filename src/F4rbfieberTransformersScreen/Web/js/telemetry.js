@@ -21,6 +21,7 @@ const fallback = {
 
 let target = structuredClone(fallback);
 let display = structuredClone(fallback);
+const hasNativeBridge = Boolean(window.chrome?.webview);
 const parseUptimeSeconds = value => {
   const parts = String(value || '').split(':').map(Number);
   return parts.length === 3 && parts.every(Number.isFinite)
@@ -61,14 +62,24 @@ const numericKeys = [
 function mergeTelemetry(payload) {
   target = { ...fallback, ...payload };
   for (const group of ['cpu','gpu','ram','network','disk']) target[group] = { ...fallback[group], ...(payload[group] || {}) };
+  for (const group of ['cpu', 'gpu']) {
+    const temperature = Number(target[group].temperature);
+    if (target[group].temperature == null || !Number.isFinite(temperature) || temperature <= 5 || temperature >= 130)
+      target[group].temperature = null;
+  }
   target.processes = Array.isArray(payload.processes) ? payload.processes : fallback.processes;
 }
 
 function onMessage(message) {
   if (!message || !message.type) return;
   if (message.type === 'telemetry' && message.payload) {
+    const isFirstNativeSample = !receivedNativeTelemetry;
     receivedNativeTelemetry = true;
     mergeTelemetry(message.payload);
+    if (isFirstNativeSample) {
+      for (const [group, key] of numericKeys)
+        display[group][key] = target[group][key];
+    }
     uptimeAnchorSeconds = parseUptimeSeconds(message.payload.uptime);
     uptimeAnchorAt = performance.now();
   }
@@ -115,7 +126,10 @@ function interpolate(now) {
     const value = target[group]?.[key];
     if (value == null || !Number.isFinite(Number(value))) display[group][key] = null;
     else {
-      const current = Number.isFinite(Number(display[group][key])) ? Number(display[group][key]) : Number(value);
+      const displayedValue = display[group][key];
+      const current = displayedValue != null && Number.isFinite(Number(displayedValue))
+        ? Number(displayedValue)
+        : Number(value);
       display[group][key] = current + (Number(value) - current) * factor;
     }
   }
@@ -130,3 +144,4 @@ export function subscribeSettings(listener) { settingsListeners.add(listener); l
 export function getSettings() { return settings; }
 export function format(value, digits = 1, suffix = '') { return value == null || !Number.isFinite(value) ? 'N/A' : `${value.toFixed(digits)}${suffix}`; }
 export function isNativeTelemetry() { return receivedNativeTelemetry; }
+export function isNativeHost() { return hasNativeBridge; }
