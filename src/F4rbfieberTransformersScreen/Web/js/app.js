@@ -228,7 +228,6 @@ function renderTelemetry(data, now) {
   $('#uptime').textContent = data.uptime || '00:00:00';
   $('#cpuName').textContent = data.cpu.name || 'PROCESSOR ARRAY';
   $('#cpuValue').textContent = format(data.cpu.usage, 0, '%');
-  renderTemperature('#cpuTemp', data.cpu.temperature);
   $('#gpuName').textContent = data.gpu.name || 'GRAPHICS ARRAY';
   $('#gpuValue').textContent = format(data.gpu.usage, 0, '%');
   renderTemperature('#gpuTemp', data.gpu.temperature);
